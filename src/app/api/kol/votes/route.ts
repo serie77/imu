@@ -7,7 +7,6 @@ import { rateLimit } from '@/utils/rate-limit';
 const limiter = rateLimit({
   interval: 60 * 1000, // 1 minute
   uniqueTokenPerInterval: 500, // Max 500 users per interval
-  limit: 30, // 30 requests per interval per token
 });
 
 export async function GET() {
