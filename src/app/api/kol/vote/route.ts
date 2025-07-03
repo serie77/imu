@@ -122,10 +122,6 @@ export async function POST(request: NextRequest) {
       });
     }
   } catch (error) {
-    if (error.statusCode === 429) {
-      return NextResponse.json({ success: false, message: 'Rate limit exceeded' }, { status: 429 });
-    }
-    
     console.error('Error in vote API:', error);
     return NextResponse.json({ 
       success: false, 
