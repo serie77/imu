@@ -46,7 +46,7 @@ const randomDelay = async () => {
   await new Promise(resolve => setTimeout(resolve, delay));
 };
 
-const fetchWalletData = async (address, timeframe = '1d') => {
+const fetchWalletData = async (address: string, timeframe = '1d') => {
   let isLoading = true;
   try {
     // Use our API route instead of fetching directly from GMGN.ai
@@ -82,7 +82,7 @@ const fetchWalletData = async (address, timeframe = '1d') => {
   }
 };
 
-const calculateRank = (data) => {
+const calculateRank = (data: any) => {
   if (!data) return 'Unranked';
 
   // Extract numeric values
@@ -269,12 +269,12 @@ const StatItem = ({ label, value, subValue, isPositive = true, icon: Icon }) => 
 };
 
 // Add this new component for displaying top trades
-const TopTradeCard = ({ trade, index }) => {
-  const copyToClipboard = async (ca) => {
+const TopTradeCard = ({ trade, index }: { trade: any, index: number }) => {
+  const copyToClipboard = async (ca: string) => {
     try {
       await navigator.clipboard.writeText(ca);
       // You might want to add a toast notification here
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to copy:', err);
     }
   };
@@ -341,7 +341,7 @@ const InactiveWalletAlert = () => (
 );
 
 // Update the getRankScore function to use the actual score
-const getRankScore = (stats) => {
+const getRankScore = (stats: any) => {
   // Extract numeric values
   const pnlValue = parseFloat(stats.pnl?.replace(/[^0-9.-]/g, '') || '0');
   const winRate = parseFloat(stats.winRate?.replace('%', '') || '0');
@@ -365,7 +365,7 @@ const getRankScore = (stats) => {
 };
 
 // Add this new component near your other components
-const ShareStatsModal = ({ isOpen, onClose, stats }) => {
+const ShareStatsModal = ({ isOpen, onClose, stats }: { isOpen: boolean, onClose: () => void, stats: any }) => {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const cardRef = useRef(null);
@@ -516,7 +516,7 @@ const WinnerBadge = () => (
   </motion.div>
 );
 
-const getAchievedMedals = (stats) => {
+const getAchievedMedals = (stats: any) => {
   const medals = [];
   if (!stats) return medals;
 
@@ -525,7 +525,7 @@ const getAchievedMedals = (stats) => {
   const tokenCount = parseInt(stats.tokensTraded || '0');
   const bestTradeValue = parseFloat(stats.bestTrade?.replace(/[$,]/g, '') || '0');
   
-  const parseHoldTime = (value) => {
+  const parseHoldTime = (value: string) => {
     if (typeof value !== 'string') return Infinity;
     const parts = value.toLowerCase().split(' ');
     const num = parseFloat(parts[0]);
@@ -559,8 +559,8 @@ const getAchievedMedals = (stats) => {
   return medals;
 };
 
-const PvpStatCompare = ({ label, value1, value2, delay, statType }) => {
-  const parseStat = (value, type) => {
+const PvpStatCompare = ({ label, value1, value2, delay, statType }: { label: string, value1: any, value2: any, delay: number, statType: string }) => {
+  const parseStat = (value: any, type: string) => {
     if (typeof value !== 'string') return parseFloat(value) || 0;
     
     switch (type) {
@@ -644,7 +644,7 @@ export default function ImuRank() {
     }
   }, [showComparison]);
 
-  const handleSearch = async (e) => {
+  const handleSearch = async (e: React.FormEvent) => {
     const query = e.target.value;
     setSearchQuery(query);
     setError(null);
@@ -687,7 +687,7 @@ export default function ImuRank() {
   const calculateWinner = () => {
     if (!wallet1 || !wallet2) return null;
     
-    const getPoints = (stats) => {
+    const getPoints = (stats: any) => {
       let points = 0;
       points += parseFloat(stats.pnl?.replace(/[^0-9.-]/g, '') || '0') * 0.7;
       points += (parseFloat(stats.winRate?.replace('%', '') || '0') / 100) * 0.3;
@@ -1485,7 +1485,7 @@ export default function ImuRank() {
 
                           {/* Best Trade Medals */}
                           {(() => {
-                            const bestTradeValue = parseFloat(selectedWallet.stats.bestTrade?.replace(/[^0-9.-]/g, '') || '0');
+                            const bestTradeValue = parseFloat(selectedWallet?.stats?.bestTrade?.replace(/[^0-9.-]/g, '') || '0');
                             const tradeMedals = [
                               {
                                 threshold: 50000,
@@ -1610,10 +1610,10 @@ export default function ImuRank() {
             holdTime: selectedWallet.stats.holdTime,
             achievedMedals: (() => {
               const medals = [];
-              const pnlValue = parseFloat(selectedWallet?.stats?.pnl?.replace?.(/[^0-9.-]/g, '') || '0');
-              const winRate = parseFloat(selectedWallet?.stats?.winRate?.replace?.('%', '') || '0');
+              const pnlValue = parseFloat(selectedWallet?.stats?.pnl?.replace(/[^0-9.-]/g, '') || '0');
+              const winRate = parseFloat(selectedWallet?.stats?.winRate?.replace('%', '') || '0');
               const tokenCount = parseInt(selectedWallet?.stats?.tokensTraded || '0');
-              const bestTradeValue = parseFloat(selectedWallet?.stats?.bestTrade?.replace?.(/[^0-9.-]/g, '') || '0');
+              const bestTradeValue = parseFloat(selectedWallet?.stats?.bestTrade?.replace(/[^0-9.-]/g, '') || '0');
               const holdTime = parseInt(selectedWallet?.stats?.holdTime || '0');
 
               // rest of the medals logic...
@@ -1629,7 +1629,7 @@ export default function ImuRank() {
   );
 }
 
-const StatsComparison = ({ label, value1, value2 }) => (
+const StatsComparison = ({ label, value1, value2 }: { label: string, value1: any, value2: any }) => (
   <div className="flex justify-between items-center bg-gray-700/50 rounded-lg p-4">
     <div className="text-left flex-1">{value1}</div>
     <div className="text-gray-400 px-4">{label}</div>
@@ -1637,7 +1637,7 @@ const StatsComparison = ({ label, value1, value2 }) => (
   </div>
 );
 
-const StatBox = ({ label, value, isProfit, className = "" }) => {
+const StatBox = ({ label, value, isProfit, className = "" }: { label: string, value: any, isProfit: boolean, className?: string }) => {
   const isPositive = isProfit && value && value.includes('+');
   const isNegative = isProfit && value && value.includes('-');
   
@@ -1658,7 +1658,7 @@ const StatBox = ({ label, value, isProfit, className = "" }) => {
   );
 };
 
-const ComparisonStat = ({ label, value1, value2, isPnl = false, delay = 0 }) => (
+const ComparisonStat = ({ label, value1, value2, isPnl = false, delay = 0 }: { label: string, value1: any, value2: any, isPnl?: boolean, delay?: number }) => (
   <motion.div
     className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-4 border border-gray-700/30"
     initial={{ y: 20, opacity: 0 }}
