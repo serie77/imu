@@ -63,7 +63,7 @@ const fetchWalletData = async (address: string, timeframe = '1d') => {
     data.rank = calculateRank(data);
     
     // Add top trades to the data
-    data.topTrades = data.topTrades?.map(trade => ({
+    data.topTrades = data.topTrades?.map((trade: any) => ({
       tokenName: trade.tokenName,
       tokenImage: trade.tokenImage,
       tokenCA: trade.tokenCA,
@@ -1539,8 +1539,8 @@ export default function ImuRank() {
 
                           {/* Special Achievement Medals */}
                           {(() => {
-                            const winRate = parseFloat(selectedWallet.stats.winRate?.replace('%', ''));
-                            const holdTime = parseInt(selectedWallet.stats.holdTime);
+                            const winRate = parseFloat(selectedWallet?.stats?.winRate?.replace('%', '') || '0');
+                            const holdTime = parseInt(selectedWallet?.stats?.holdTime || '0');
                             
                             const specialMedals = [
                               {
