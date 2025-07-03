@@ -8,7 +8,8 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { load } from 'cheerio';
 import html2canvas from 'html2canvas';
 
-const isValidSolanaAddress = (address) => {
+// Line 11: Add string type annotation
+const isValidSolanaAddress = (address: string) => {
   return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
 };
 
