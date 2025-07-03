@@ -21,7 +21,7 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       message: 'Database connection successful',
-      collections: collections.map(col => col.name)
+      collections: collections.map((col: any) => col.name)
     });
   } catch (error) {
     console.error('Database test failed:', error);

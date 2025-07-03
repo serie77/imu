@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      voters: voters.map(vote => ({
+      voters: voters.map((vote: any) => ({
         wallet: vote.voter_wallet.slice(0, 4) + '...' + vote.voter_wallet.slice(-4),
         vote_type: vote.vote_type,
         timestamp: vote.timestamp

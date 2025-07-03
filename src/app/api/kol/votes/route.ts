@@ -40,7 +40,7 @@ export async function GET() {
     
     return NextResponse.json({
       success: true,
-      votes: voteCounts.map(vote => ({
+      votes: voteCounts.map((vote: any) => ({
         kol_address: vote.kol_address,
         upvotes: vote.upvotes,
         downvotes: vote.downvotes,
