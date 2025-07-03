@@ -7,7 +7,7 @@ export default function GmgnTest() {
   const [timeframe, setTimeframe] = useState('7d');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [responseText, setResponseText] = useState('');
 
   const fetchData = async () => {
@@ -27,7 +27,7 @@ export default function GmgnTest() {
       let result;
       try {
         result = JSON.parse(text);
-      } catch (e) {
+      } catch (e: any) {
         setError(`Failed to parse response as JSON: ${e.message}`);
         setLoading(false);
         return;
@@ -38,7 +38,7 @@ export default function GmgnTest() {
       } else {
         setError(result.error || 'Failed to fetch data');
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);

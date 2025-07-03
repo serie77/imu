@@ -19,16 +19,16 @@ const AiChat = ({
   currentPath,
   onNavigate
 }) => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('chat');
   const [nameInput, setNameInput] = useState(userName || '');
-  const [typingMessage, setTypingMessage] = useState(null);
+  const [typingMessage, setTypingMessage] = useState<any>(null);
   const [typingIndex, setTypingIndex] = useState(0);
   const [typingSpeed, setTypingSpeed] = useState(30); // milliseconds per character
   const messagesEndRef = useRef(null);
-  const [selectedInfo, setSelectedInfo] = useState(null);
+  const [selectedInfo, setSelectedInfo] = useState<any>(null);
 
   // Predefined questions
   const predefinedOptions = [
@@ -121,7 +121,7 @@ const AiChat = ({
           options: responseOptions
         });
       }, 1000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error);
       setMessages(prev => [...prev, { role: 'assistant', content: "I'm sorry, I encountered an error. Please try again." }]);
       setIsLoading(false);

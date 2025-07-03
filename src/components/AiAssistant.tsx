@@ -14,7 +14,7 @@ const AiAssistant = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isBlinking, setIsBlinking] = useState(false);
   const [eyePosition, setEyePosition] = useState({ x: 0, y: 0 });
-  const [selectedInfo, setSelectedInfo] = useState(null);
+  const [selectedInfo, setSelectedInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [typingText, setTypingText] = useState("");
