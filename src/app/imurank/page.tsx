@@ -230,7 +230,7 @@ const RankDisplay = ({ rank }: { rank: string }) => {
   );
 };
 
-const StatItem = ({ label, value, subValue, isPositive = true, icon: Icon }) => {
+const StatItem = ({ label, value, subValue, isPositive = true, icon: Icon }: { label: string, value: any, subValue?: any, isPositive?: boolean, icon: any }) => {
   // Handle numeric values with potential negative signs
   const isNumericValue = typeof value === 'string' && value.includes('$');
   const numericValue = isNumericValue ? parseFloat(value.replace(/[^0-9.-]/g, '')) : null;
