@@ -18,7 +18,7 @@ export async function GET() {
         const changeStream = db.collection('votes').watch();
         
         // Handle changes
-        changeStream.on('change', async (change) => {
+        changeStream.on('change', async (change: any) => {
           if (change.operationType === 'insert' || change.operationType === 'update' || change.operationType === 'delete') {
             try {
               // Get the KOL address from the change
@@ -100,7 +100,7 @@ export async function GET() {
         });
         
         // Handle errors
-        changeStream.on('error', (error) => {
+        changeStream.on('error', (error: any) => {
           console.error('Change stream error:', error);
           controller.error(error);
         });

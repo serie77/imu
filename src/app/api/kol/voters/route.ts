@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ 
       success: false, 
       message: 'Error retrieving voters', 
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       voters: []
     }, { status: 500 });
   }

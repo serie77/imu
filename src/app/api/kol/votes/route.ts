@@ -52,7 +52,7 @@ export async function GET() {
     return NextResponse.json({ 
       success: false, 
       message: 'Error retrieving votes', 
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       votes: []
     }, { status: 500 });
   }

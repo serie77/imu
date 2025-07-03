@@ -9,7 +9,7 @@ const limiter = rateLimit({
   uniqueTokenPerInterval: 500, // Max 500 users per interval
 });
 
-export async function POST(request) {
+export async function POST(request: NextRequest) {
   try {
     console.log('Vote API called');
     
@@ -130,7 +130,7 @@ export async function POST(request) {
     return NextResponse.json({ 
       success: false, 
       message: 'Error recording vote', 
-      error: error.message || 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 } 
