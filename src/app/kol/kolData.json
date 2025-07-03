@@ -1,0 +1,214 @@
+[
+    {
+        "solana_address": "DfMxre4cKmvogbLrPigxmibVTTQDuzjdXojWzjCXXhzj",
+        "name": "Euris",
+        "twitter": "https://x.com/Euris_JT",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1932571961097342976/283KPylU_400x400.jpg",
+        "tags": ["VIP", "Bag Holder"]
+    },
+    {
+        "solana_address": "DNfuF1L62WWyW3pNakVkyGGFzVVhj4Yr52jSmdTyeBHm",
+        "name": "Gake",
+        "twitter": "https://x.com/Ga__ke",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1915612620159410181/LYDCX3rF_400x400.jpg",
+        "tags": ["VIP", "Bag Holder"],
+        "links": [
+            {
+                "type": "telegram",
+                "url": "https://t.me/teamgake",
+                "username": "teamgake"
+            }
+        ]
+    },
+    {
+        "solana_address": "73LnJ7G9ffBDjEBGgJDdgvLUhD5APLonKrNiHsKDCw5B",
+        "name": "Waddles",
+        "twitter": "https://x.com/waddles_eth",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1934434493764706304/veGJl4vl_400x400.jpg",
+        "tags": ["Flipper", "Dev"]
+    },
+    {
+        "solana_address": "8deJ9xeUvXSJwicYptA9mHsU2rN2pDx37KWzkDkEXhU6",
+        "name": "Cooker",
+        "twitter": "https://x.com/cookerflips",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1919779664614326273/Ilm1LfAI_400x400.jpg",
+        "tags": ["VIP", "Bag Holder"],
+        "links": [
+            {
+                "type": "telegram",
+                "url": "https://t.me/CookersCooks",
+                "username": "CookersCooks"
+            }
+        ]
+    },
+    {
+        "solana_address": "BCnqsPEtA1TkgednYEebRpkmwFRJDCjMQcKZMMtEdArc",
+        "name": "Kreo",
+        "twitter": "https://x.com/kreo444",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1914478945581330432/LnAG7hpJ_400x400.jpg",
+        "tags": ["Flipper", "Streamer"],
+        "links": [
+            {
+                "type": "twitch",
+                "url": "https://t.co/UaBhb9qtjT",
+                "username": "kreo444"
+            }
+        ]
+    },
+    {
+        "solana_address": "6LChaYRYtEYjLEHhzo4HdEmgNwu2aia8CM8VhR9wn6n7",
+        "name": "Assassin.eth",
+        "twitter": "https://x.com/assasin_eth",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1940167593488158720/0253hteh_400x400.jpg",
+        "tags": ["Flipper"],
+        "links": [
+            {
+                "type": "telegram",
+                "url": "https://t.me/assasinjournall",
+                "username": "assasinjournall"
+            }
+        ]
+    },
+    {
+        "solana_address": "suqh5sHtr8HyJ7q8scBimULPkPpA557prMG47xCHQfK",
+        "name": "Cupsey",
+        "twitter": "https://x.com/Cupseyy",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1878584793249583104/WMH0-IGY_400x400.jpg",
+        "communityNotes": [
+            "Bro has the most copytraders of all time",
+            "cupsey is the goat of pumpfun for sure"
+        ],
+        "tags": ["Flipper", "Streamer"],
+        "links": [
+            {
+                "type": "twitch",
+                "url": "https://twitch.tv/cupseyy",
+                "username": "Cupseyy"
+            },
+            {
+                "type": "telegram",
+                "url": "https://t.me/cupseyjournal",
+                "username": "cupseyjournal"
+            }
+        ]
+    },
+    {
+        "solana_address": "96sErVjEN7LNJ6Uvj63bdRWZxNuBngj56fnT9biHLKBf",
+        "name": "Orange",
+        "twitter": "https://x.com/OrangeSBS",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1894930418526232576/D20K7c29_400x400.jpg",
+        "tags": ["Bag Holder", "CTO Lead"]
+    },
+    {
+        "solana_address": "ATFRUwvyMh61w2Ab6AZxUyxsAfiiuG1RqL6iv3Vi9q2B",
+        "name": "Marcell",
+        "twitter": "https://x.com/MarcellxMarcell",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1940060251950047233/UTek-wOV_400x400.jpg",
+        "tags": ["CTO Lead", "Flipper"],
+        "links": [
+            {
+                "type": "telegram",
+                "url": "https://t.me/marcellcooks",
+                "username": "marcellcooks"
+            }
+        ]
+    },
+    {
+        "solana_address": "BXNiM7pqt9Ld3b2Hc8iT3mA5bSwoe9CRrtkSUs15SLWN",
+        "name": "Absol",
+        "twitter": "https://x.com/absolquant",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1925645249277218817/aqCBFytS_400x400.jpg",
+        "tags": ["Dev", "Flipper"]
+    },
+    {
+        "solana_address": "CyaE1VxvBrahnPWkqm5VsdCvyS2QmNht2UFrKJHga54o",
+        "name": "Cented",
+        "twitter": "https://x.com/Cented7",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1889750546791165952/vPbYBRtF_400x400.jpg",
+        "tags": ["Flipper", "Streamer", "VIP"],
+        "links": [
+            {
+                "type": "twitch",
+                "url": "https://www.twitch.tv/cented",
+                "username": "cented"
+            }
+        ]
+    },
+    {
+        "solana_address": "26kZ9rg8Y5pd4j1tdT4cbT8BQRu5uDbXkaVs3L5QasHy",
+        "name": "Orangie",
+        "twitter": "https://x.com/orangie",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1919076155690283009/6gLi-xyk_400x400.jpg",
+        "tags": ["Streamer"],
+        "links": [
+            {
+                "type": "twitch",
+                "url": "https://www.twitch.tv/orangieyt",
+                "username": "orangieyt"
+            }
+        ]
+    },
+    {
+        "solana_address": "ApRnQN2HkbCn7W2WWiT2FEKvuKJp9LugRyAE1a9Hdz1",
+        "name": "Barf",
+        "twitter": "https://x.com/solkcrow",
+        "profile_picture": "https://pump.mypinata.cloud/ipfs/QmUbqCfnG9eMbh7ZvhTqrrBaAKfSyf3eam7TxkALsyPxo5",
+        "tags": ["Bag Holder", "CTO Lead", "VIP"]
+    },
+    {
+        "solana_address": "GfXQesPe3Zuwg8JhAt6Cg8euJDTVx751enp9EQQmhzPH",
+        "name": "Spuno",
+        "twitter": "https://x.com/spunosounds",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1852443399271628801/QK1uy_j3_400x400.jpg",
+        "tags": []
+    },
+    {
+        "solana_address": "BTf4A2exGK9BCVDNzy65b9dUzXgMqB4weVkvTMFQsadd",
+        "name": "Kev",
+        "twitter": "https://x.com/Kevsznx",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1931149689153343488/WTN8vQu9_400x400.jpg",
+        "tags": ["Flipper"]
+    },
+    {
+        "solana_address": "525LueqAyZJueCoiisfWy6nyh4MTvmF4X9jSqi6efXJT",
+        "name": "Joji",
+        "twitter": "https://x.com/metaversejoji",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1939326410339811328/ziljn_Qo_400x400.jpg",
+        "tags": ["Flipper"]
+    },
+    {
+        "solana_address": "4Be9CvxqHW6BYiRAxW9Q3xu1ycTMWaL5z8NX4HR3ha7t",
+        "name": "Mitch",
+        "twitter": "https://x.com/1solinfeb",
+        "profile_picture": "https://i1.sndcdn.com/artworks-dgVTUFPy0rLOkq1C-EWa2wQ-t500x500.jpg",
+        "tags": []
+    },
+    {
+        "solana_address": "AE3tJDEyUdwBM8ZoUb3iCo563gMbq26JtckfvjcVZbSa",
+        "name": "Roxo",
+        "twitter": "https://x.com/RoxoXBT",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1939539353694257152/OcF2-rzB_400x400.jpg",
+        "tags": ["Bag Holder"]
+    },
+    {
+        "solana_address": "6RYVUPzp1rPaDQth8LaNLaMcZg4HRe3L9LhpJDV9ZZWf",
+        "name": "Casino",
+        "twitter": "https://x.com/casino616",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1938817754917679104/ysUWGQMM_400x400.jpg",
+        "tags": ["Flipper"]
+    },
+    {
+        "solana_address": "DKgvpfttzmJqZXdavDwTxwSVkajibjzJnN2FA99dyciK",
+        "name": "Rowdy",
+        "twitter": "https://x.com/RowdyCrypto",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1899006327017340928/FfXQi7Os_400x400.jpg",
+        "tags": ["Bag Holder"]
+    },
+    {
+        "solana_address": "AVAZvHLR2PcWpDf8BXY4rVxNHYRBytycHkcB5z5QNXYm",
+        "name": "Ansem",
+        "twitter": "https://x.com/blknoiz06",
+        "profile_picture": "https://pbs.twimg.com/profile_images/1868298971837255680/cN-ikO7h_400x400.jpg",
+        "tags": []
+    }
+]
