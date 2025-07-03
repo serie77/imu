@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 
-export async function POST(request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { voterWallet } = body;
@@ -32,7 +32,7 @@ export async function POST(request) {
     return NextResponse.json({ 
       success: false, 
       message: 'Error checking votes', 
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       votes: []
     }, { status: 500 });
   }
