@@ -22,7 +22,6 @@ import {
 import { Activity, BarChart3, Loader2, ArrowUpRight, ArrowDownRight, RefreshCw, X } from 'lucide-react';
 import { fetchVolumeData, fetchTokenData, fetchTransactionData, fetchPumpSwapVolumeData, fetchAllTradingBotData } from "@/utils/dune-client";
 import type { ProcessedData } from "@/types/market-stats";
-import TokenLaunchGraph from '@/components/TokenLaunchGraph';
 
 const API_KEY = process.env.DUNE_API_KEY!;
 
@@ -161,8 +160,14 @@ const customScrollbarStyles = `
 }
 `;
 
-// Token Launch Graph Modal Component
-const TokenLaunchGraph = ({ data, onClose }: { data: any[], onClose: () => void }) => {
+// Fix the TokenLaunchGraph component interface
+interface TokenHistoryData {
+  date: string;
+  tokensLaunched: number;
+  addressesCreating: number;
+}
+
+const TokenLaunchGraph = ({ data, onClose }: { data: TokenHistoryData[], onClose: () => void }) => {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -221,6 +226,13 @@ const formatCurrency = (value: number, decimals: number = 2) => {
   return `$${value.toFixed(decimals)}`;
 };
 
+// Add this hardcoded dates array near the top of the file, after the imports
+const hardcodedTokenActivityDates = [
+  "Dec 15", "Dec 14", "Dec 13", "Dec 12", "Dec 11", 
+  "Dec 10", "Dec 09", "Dec 08", "Dec 07", "Dec 06",
+  "Dec 05", "Dec 04", "Dec 03", "Dec 02", "Dec 01"
+];
+
 export default function MarketStatsPage() {
   const [activeSection, setActiveSection] = useState<'pumpFun' | 'pumpSwap' | 'tradingBot'>('pumpFun');
   const [viewMode, setViewMode] = useState<'graph' | 'text'>('graph');
@@ -229,12 +241,12 @@ export default function MarketStatsPage() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [showTokenGraph, setShowTokenGraph] = useState(false);
-  const [pumpSwapData, setPumpSwapData] = useState(null);
+  const [pumpSwapData, setPumpSwapData] = useState<any>(null);
   const [pumpSwapLoading, setPumpSwapLoading] = useState(true);
-  const [pumpSwapError, setPumpSwapError] = useState(null);
+  const [pumpSwapError, setPumpSwapError] = useState<string | null>(null);
   const [tradingBotData, setTradingBotData] = useState<any>(null);
   const [tradingBotLoading, setTradingBotLoading] = useState<boolean>(false);
-  const [tradingBotError, setTradingBotError] = useState(null);
+  const [tradingBotError, setTradingBotError] = useState<string | null>(null);
   const [pumpFunViewMode, setPumpFunViewMode] = useState<'graph' | 'list'>('graph');
   const [visibleBots, setVisibleBots] = useState({
     axiom: true,
@@ -247,7 +259,7 @@ export default function MarketStatsPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [chartViewMode, setChartViewMode] = useState('chart');
   const [growthChartViewMode, setGrowthChartViewMode] = useState('chart');
-  const [botVolumeData, setBotVolumeData] = useState([]);
+  const [botVolumeData, setBotVolumeData] = useState<any[]>([]);
   const [botViewMode, setBotViewMode] = useState('chart');
   
   const formatNumber = (num: number | undefined | null) => {
@@ -323,12 +335,12 @@ export default function MarketStatsPage() {
               volume?.result?.rows[2]?.total_transactions || 0
             )
           },
-          volumeHistory: volume?.result?.rows.slice(1, 15).map(row => ({
+          volumeHistory: volume?.result?.rows.slice(1, 15).map((row: any) => ({
             date: formatDate(row.date_time),
             volumeUSD: row.total_sol_volume_usd,
             volumeSOL: row.total_sol_volume
           })).reverse() || [],
-          tokenHistory: token?.result?.rows.slice(1, 15).map((row, idx) => ({
+          tokenHistory: token?.result?.rows.slice(1, 15).map((row: any, idx: number) => ({
             date: hardcodedTokenActivityDates[idx] || formatDate(row.date_time),
             tokensLaunched: row.total_tokens_launched,
             addressesCreating: row.total_addresses_creating
@@ -384,12 +396,12 @@ export default function MarketStatsPage() {
         // Sum the last 7 complete days (indices 1-7)
         const last7DaysVolume = volumeHistory
           .slice(1, 8)
-          .reduce((sum, day) => sum + (day.daily_volume_usd || 0), 0);
+          .reduce((sum: number, day: any) => sum + (day.daily_volume_usd || 0), 0);
         
         // Sum the previous 7 days (indices 8-14)
         const previous7DaysVolume = volumeHistory
           .slice(8, 15)
-          .reduce((sum, day) => sum + (day.daily_volume_usd || 0), 0);
+          .reduce((sum: number, day: any) => sum + (day.daily_volume_usd || 0), 0);
         
         // Calculate percentage change
         const weeklyVolumeChange = calculatePercentChange(last7DaysVolume, previous7DaysVolume);
@@ -410,9 +422,9 @@ export default function MarketStatsPage() {
             formatted: `$${(dailyVolumeRow?.total_volume_usd_billions || 0).toFixed(2)}B` // Show as billions
           },
           volumeHistory: volumeHistory
-            .filter((row, index) => index > 0)
+            .filter((row: any, index: number) => index > 0)
             .slice(0, 14)
-            .map(row => ({
+            .map((row: any) => ({
               date: formatDate(row.date),
               volume: row.daily_volume_usd / 1_000_000, // Convert to millions for chart display
               cumulative: row.cumulative_volume_usd / 1_000_000_000, // Convert to billions for chart display
@@ -452,7 +464,7 @@ export default function MarketStatsPage() {
         
         // Process volume data for the chart
         const volumeData = allBotData.volumeHistory || [];
-        const processedData = volumeData.map(day => ({
+        const processedData = volumeData.map((day: any) => ({
           date: day.date,
           axiom: day.axiomVolume || 0,
           photon: day.photonVolume || 0, 
@@ -522,13 +534,13 @@ export default function MarketStatsPage() {
     }
 
     const numDays = 30; // Target number of days
-    const chartData = [];
+    const chartData: any[] = [];
 
     // --- Create lookup maps for efficient data retrieval ---
-    const createVolumeMap = (botKey) => {
+    const createVolumeMap = (botKey: string) => {
       const rows = tradingBotData[botKey]?.result?.rows || [];
       // Map: "YYYY-MM-DD HH:MM:SS.sss UTC" -> avg_daily_volume_7d
-      return new Map(rows.map(row => [row.day, row.avg_daily_volume_7d]));
+      return new Map(rows.map((row: any) => [row.day, row.avg_daily_volume_7d]));
     };
 
     const photonVolumeMap = createVolumeMap('photon');
@@ -540,7 +552,7 @@ export default function MarketStatsPage() {
     const axiomRows = tradingBotData.axiom.result.rows.slice(0, numDays);
 
     for (const axiomRow of axiomRows) {
-      const currentDateStr = axiomRow.day; // Full date string like "2025-04-26 00:00:00.000 UTC"
+      const currentDateStr = (axiomRow as any).day; // Full date string like "2025-04-26 00:00:00.000 UTC"
 
       // Format the date string to "Mon DD" (e.g., "Apr 26")
       let formattedDate = "Invalid Date";
@@ -557,14 +569,14 @@ export default function MarketStatsPage() {
       }
 
       // Helper to safely get volume in millions
-      const getVolumeInMillions = (volumeMap, dateKey) => {
+      const getVolumeInMillions = (volumeMap: Map<string, any>, dateKey: string) => {
         const rawVolume = volumeMap.get(dateKey);
         if (rawVolume === undefined || rawVolume === null) return 0;
         const volume = parseFloat(rawVolume);
         return isNaN(volume) ? 0 : volume / 1000000;
       };
 
-      const axiomVolume = parseFloat(axiomRow.avg_daily_volume_7d);
+      const axiomVolume = parseFloat((axiomRow as any).avg_daily_volume_7d || '0');
 
       chartData.push({
         date: formattedDate,
@@ -844,7 +856,7 @@ export default function MarketStatsPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {data?.volumeHistory.map((item, index) => (
+                        {data?.volumeHistory.map((item: any, index: number) => (
                           <tr key={index} className="border-b border-gray-700/30 hover:bg-gray-700/20">
                             <td className="p-4 text-gray-300">{item.date}</td>
                             <td className="p-4 text-gray-300 text-right">${formatNumber(item.volumeUSD)}</td>
@@ -941,7 +953,7 @@ export default function MarketStatsPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {data?.tokenHistory.map((item, index) => (
+                        {data?.tokenHistory.map((item: any, index: number) => (
                           <tr key={index} className="border-b border-gray-700/30 hover:bg-gray-700/20">
                             <td className="p-4 text-gray-300">{item.date}</td>
                             <td className="p-4 text-gray-300 text-right">{item.tokensLaunched}</td>
@@ -1110,12 +1122,13 @@ export default function MarketStatsPage() {
                       />
                       <Tooltip
                         contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                        formatter={(value, name) => {
+                        formatter={(value: any, name: string) => {
+                          const numValue = typeof value === 'number' ? value : parseFloat(value) || 0;
                           if (name === 'Daily Volume') {
-                            return [`$${value.toFixed(1)}M`, 'Daily Volume'];
+                            return [`$${numValue.toFixed(1)}M`, 'Daily Volume'];
                           }
                           if (name === 'Cumulative Volume') {
-                            return [`$${value.toFixed(1)}B`, 'Cumulative Volume'];
+                            return [`$${numValue.toFixed(1)}B`, 'Cumulative Volume'];
                           }
                           return [value, name];
                         }}
@@ -1318,8 +1331,8 @@ export default function MarketStatsPage() {
     const allDates = new Set();
     
     // Add dates from each dataset to our set of unique dates
-    [axiomData, photonData, bullxData, trojanData, gmgnData].forEach(dataset => {
-      dataset.forEach(item => {
+    [axiomData, photonData, bullxData, trojanData, gmgnData].forEach((dataset: any[]) => {
+      dataset.forEach((item: any) => {
         if (item.day) {
           // Extract just the date part
           const date = item.day.split(' ')[0];
@@ -1332,7 +1345,7 @@ export default function MarketStatsPage() {
     const sortedDates = Array.from(allDates).sort(); // Remove .reverse()
     
     // Create the combined dataset using our sorted unique dates
-    const combinedData = [];
+    const combinedData: any[] = [];
     
     // Take the most recent 14 days (but we'll reverse at the end for proper order)
     const recentDates = sortedDates.slice(-14); // Get last 14 dates (most recent)
@@ -1341,8 +1354,8 @@ export default function MarketStatsPage() {
       const date = recentDates[i];
       
       // Helper function to find and parse volume for a date in a dataset
-      const getVolumeForDate = (dataset, date) => {
-        const item = dataset.find(row => row.day && row.day.substring(0, 10) === date);
+      const getVolumeForDate = (dataset: any[], date: string) => {
+        const item = dataset.find((row: any) => row.day && row.day.substring(0, 10) === date);
         return item ? parseFloat(item.total_volume_usd || 0) : 0;
       };
       
@@ -1393,14 +1406,14 @@ export default function MarketStatsPage() {
             bullx: {name: "BullX", color: "#22C55E"},
             trojan: {name: "Trojan", color: "#3B82F6"},
             gmgn: {name: "GMGN", color: "#10B981"}
-          }).map(([key, {name, color}]) => (
+          }).map(([key, {name, color}]: [string, {name: string, color: string}]) => (
             <button
               key={key}
-              onClick={() => setVisibleBots(prev => ({...prev, [key]: !prev[key]}))}
-              className={`px-3 py-1 rounded-md flex items-center space-x-1 border ${visibleBots[key] 
+              onClick={() => setVisibleBots(prev => ({...prev, [key]: !prev[key as keyof typeof prev]}))}
+              className={`px-3 py-1 rounded-md flex items-center space-x-1 border ${visibleBots[key as keyof typeof visibleBots] 
                 ? 'border-gray-500 text-white' 
                 : 'border-gray-600 text-gray-400'}`}
-              style={{backgroundColor: visibleBots[key] ? color : 'transparent', opacity: visibleBots[key] ? 1 : 0.7}}
+              style={{backgroundColor: visibleBots[key as keyof typeof visibleBots] ? color : 'transparent', opacity: visibleBots[key as keyof typeof visibleBots] ? 1 : 0.7}}
             >
               <span className="w-3 h-3 rounded-full" style={{backgroundColor: color}}></span>
               <span>{name}</span>
@@ -1503,7 +1516,7 @@ export default function MarketStatsPage() {
                 </tr>
               </thead>
               <tbody>
-                {combinedData.map((day, i) => (
+                {combinedData.map((day: any, i: number) => (
                   <tr key={i} className="border-b border-gray-700 hover:bg-gray-700/50">
                     <td className="px-4 py-2">{day.date}</td>
                     {visibleBots.axiom && <td className="px-4 py-2">{formatCurrency(day.axiom)}</td>}
@@ -1519,6 +1532,11 @@ export default function MarketStatsPage() {
         )}
       </div>
     );
+  };
+
+  // Add the toggleBotVisibility function here, INSIDE the component
+  const toggleBotVisibility = (botName: string) => {
+    setVisibleBots(prev => ({...prev, [botName]: !prev[botName as keyof typeof prev]}));
   };
 
   // Return the main component structure
@@ -1633,7 +1651,7 @@ export default function MarketStatsPage() {
         
         {/* Token Launch Graph Modal */}
         <AnimatePresence>
-          {showTokenGraph && data && (
+          {showTokenGraph && data?.tokenHistory && (
             <TokenLaunchGraph 
               data={data.tokenHistory} 
               onClose={() => setShowTokenGraph(false)} 
@@ -1644,28 +1662,3 @@ export default function MarketStatsPage() {
     </div>
   );
 }
-// And add this function to toggle bot visibility if it doesn't exist
-const toggleBotVisibility = (botName: string) => {
-  setVisibleBots(prev => ({
-    ...prev,
-    [botName]: !prev[botName]
-  }));
-};
-
-// Hardcoded, formatted dates: Jun 19, 2025 to Jul 2, 2025 (14 days)
-const hardcodedTokenActivityDates = [
-  "Jun 19, 2025",
-  "Jun 20, 2025",
-  "Jun 21, 2025",
-  "Jun 22, 2025",
-  "Jun 23, 2025",
-  "Jun 24, 2025",
-  "Jun 25, 2025",
-  "Jun 26, 2025",
-  "Jun 27, 2025",
-  "Jun 28, 2025",
-  "Jun 29, 2025",
-  "Jun 30, 2025",
-  "Jul 1, 2025",
-  "Jul 2, 2025"
-];

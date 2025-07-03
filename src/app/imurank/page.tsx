@@ -169,6 +169,35 @@ interface GMGNData {
   }>;
 }
 
+// Add proper types for interfaces
+interface WalletStats {
+  winRate: string;
+  pnl: string;
+  greenTrades: number;
+  redTrades: number;
+  realizedProfits: string;
+  totalCost: string;
+  tokenAvgCost: string;
+  balance: string;
+  tokensTraded: string;
+  holdTime: string;
+  bestTrade: string;
+  bestTradePercentage: number;
+  rank: string;
+  isInactive?: boolean;
+  achievedMedals?: Array<{
+    icon: React.ComponentType<any>;
+    color: string;
+    name: string;
+    desc: string;
+  }>;
+}
+
+interface WalletData {
+  address: string;
+  stats: WalletStats;
+}
+
 // Modify the RankDisplay component to include better gradients and animations
 const RankDisplay = ({ rank }: { rank: string }) => {
   const getRankColor = (rank: string) => {
@@ -230,11 +259,17 @@ const RankDisplay = ({ rank }: { rank: string }) => {
   );
 };
 
-const StatItem = ({ label, value, subValue, isPositive = true, icon: Icon }: { label: string, value: any, subValue?: any, isPositive?: boolean, icon: any }) => {
+const StatItem = ({ label, value, subValue, isPositive = true, icon: Icon }: { 
+  label: string; 
+  value: string | number; 
+  subValue?: string | number; 
+  isPositive?: boolean; 
+  icon: React.ComponentType<any>;
+}) => {
   // Handle numeric values with potential negative signs
   const isNumericValue = typeof value === 'string' && value.includes('$');
   const numericValue = isNumericValue ? parseFloat(value.replace(/[^0-9.-]/g, '')) : null;
-  const valueColor = isNumericValue
+  const valueColor = isNumericValue && numericValue !== null
     ? numericValue > 0
       ? 'text-green-400'
       : numericValue < 0
@@ -269,12 +304,22 @@ const StatItem = ({ label, value, subValue, isPositive = true, icon: Icon }: { l
 };
 
 // Add this new component for displaying top trades
-const TopTradeCard = ({ trade, index }: { trade: any, index: number }) => {
-  const copyToClipboard = async (ca: string) => {
+const TopTradeCard = ({ trade, index }: { 
+  trade: {
+    tokenName: string;
+    tokenImage: string;
+    tokenCA: string;
+    realizedProfit: string;
+    pnlPercentage: string;
+    timestamp: string;
+  }; 
+  index: number;
+}) => {
+  const copyToClipboard = async (ca: string): Promise<void> => {
     try {
       await navigator.clipboard.writeText(ca);
       // You might want to add a toast notification here
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to copy:', err);
     }
   };
@@ -365,18 +410,40 @@ const getRankScore = (stats: any) => {
 };
 
 // Add this new component near your other components
-const ShareStatsModal = ({ isOpen, onClose, stats }: { isOpen: boolean, onClose: () => void, stats: any }) => {
+const ShareStatsModal = ({ isOpen, onClose, stats }: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  stats: {
+    address: string;
+    rank: string;
+    pnl: string;
+    winRate: string;
+    tokensTraded: string;
+    bestTrade: string;
+    holdTime: string;
+    achievedMedals?: Array<{
+      icon: React.ComponentType<any>;
+      color: string;
+      name: string;
+      desc: string;
+    }>;
+  };
+}) => {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
-  const cardRef = useRef(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  const handleCopyCard = async () => {
+  const handleCopyCard = async (): Promise<void> => {
     try {
+      if (!cardRef.current) return;
+      
       const canvas = await html2canvas(cardRef.current, {
         useCORS: true,
         scale: 2,
       });
       canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        
         await navigator.clipboard.write([
           new ClipboardItem({
             'image/png': blob
@@ -516,8 +583,18 @@ const WinnerBadge = () => (
   </motion.div>
 );
 
-const getAchievedMedals = (stats: any) => {
-  const medals = [];
+const getAchievedMedals = (stats: WalletStats): Array<{
+  icon: React.ComponentType<any>;
+  color: string;
+  name: string;
+  desc: string;
+}> => {
+  const medals: Array<{
+    icon: React.ComponentType<any>;
+    color: string;
+    name: string;
+    desc: string;
+  }> = [];
   if (!stats) return medals;
 
   const pnlValue = parseFloat(stats.pnl?.replace(/[^0-9.-]/g, '') || '0');
@@ -559,9 +636,15 @@ const getAchievedMedals = (stats: any) => {
   return medals;
 };
 
-const PvpStatCompare = ({ label, value1, value2, delay, statType }: { label: string, value1: any, value2: any, delay: number, statType: string }) => {
-  const parseStat = (value: any, type: string) => {
-    if (typeof value !== 'string') return parseFloat(value) || 0;
+const PvpStatCompare = ({ label, value1, value2, delay, statType }: { 
+  label: string; 
+  value1: string | number; 
+  value2: string | number; 
+  delay: number; 
+  statType: string;
+}) => {
+  const parseStat = (value: string | number, type: string): number => {
+    if (typeof value !== 'string') return parseFloat(value.toString()) || 0;
     
     switch (type) {
       case 'pnl':
@@ -618,12 +701,12 @@ const PvpStatCompare = ({ label, value1, value2, delay, statType }: { label: str
 export default function ImuRank() {
   const { connected } = useWallet();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedWallet, setSelectedWallet] = useState(null);
+  const [selectedWallet, setSelectedWallet] = useState<WalletData | null>(null);
   const [isPvpMode, setIsPvpMode] = useState(false);
-  const [wallet1, setWallet1] = useState(null);
-  const [wallet2, setWallet2] = useState(null);
+  const [wallet1, setWallet1] = useState<WalletData | null>(null);
+  const [wallet2, setWallet2] = useState<WalletData | null>(null);
   const [showComparison, setShowComparison] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [address, setAddress] = useState('');
   const [timeframe, setTimeframe] = useState('1d');
@@ -644,7 +727,7 @@ export default function ImuRank() {
     }
   }, [showComparison]);
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
     setError(null);
@@ -667,7 +750,7 @@ export default function ImuRank() {
           setSearchQuery("");
         } catch (err) {
           console.error('Search error:', err);
-          setError(err.message || 'Failed to fetch wallet data');
+          setError(err instanceof Error ? err.message : 'Failed to fetch wallet data');
         } finally {
           setLoading(false);
         }
@@ -684,10 +767,10 @@ export default function ImuRank() {
     setError(null);
   };
 
-  const calculateWinner = () => {
+  const calculateWinner = (): WalletData | null => {
     if (!wallet1 || !wallet2) return null;
     
-    const getPoints = (stats: any) => {
+    const getPoints = (stats: WalletStats): number => {
       let points = 0;
       points += parseFloat(stats.pnl?.replace(/[^0-9.-]/g, '') || '0') * 0.7;
       points += (parseFloat(stats.winRate?.replace('%', '') || '0') / 100) * 0.3;
@@ -707,7 +790,7 @@ export default function ImuRank() {
   const winner = React.useMemo(() => calculateWinner(), [wallet1, wallet2, showComparison]);
 
   // Function to fetch GMGN data from our API route
-  const fetchGMGNData = async (address: string, timeframe: string) => {
+  const fetchGMGNData = async (address: string, timeframe: string): Promise<void> => {
     if (!address) return;
     
     setLoading(true);
@@ -889,16 +972,16 @@ export default function ImuRank() {
                       loser: { y: 0, scale: 0.97, opacity: 0.6, boxShadow: '0px 0px 0px rgba(0,0,0,0)', transition: { duration: 0.4, ease: 'easeOut' }}
                     }}
                     initial={{opacity: 0, x: -50}}
-                    animate={winnerRevealed ? (winner?.address === wallet1.address ? 'winner' : 'loser') : 'initial'}
+                    animate={winnerRevealed ? (winner?.address === wallet1?.address ? 'winner' : 'loser') : 'initial'}
                     whileInView={{opacity: 1, x: 0}}
                     transition={{ duration: 0.5, ease: 'easeOut' }}
                   >
-                    {winnerRevealed && winner?.address === wallet1.address && <WinnerBadge />}
-                    <p className="font-mono text-gray-400 text-sm mb-4 truncate">{wallet1.address}</p>
-                    <RankDisplay rank={wallet1.stats.rank} />
+                    {winnerRevealed && winner?.address === wallet1?.address && <WinnerBadge />}
+                    <p className="font-mono text-gray-400 text-sm mb-4 truncate">{wallet1?.address}</p>
+                    <RankDisplay rank={wallet1?.stats.rank || ''} />
                     <div className="mt-6 border-t border-gray-700/50 pt-4 h-16 flex justify-center items-center">
                         <div className="flex justify-center items-center gap-2 flex-wrap">
-                            {wallet1.stats.achievedMedals?.length > 0 ? (
+                            {wallet1?.stats?.achievedMedals && wallet1.stats.achievedMedals.length > 0 ? (
                                 wallet1.stats.achievedMedals.slice(0, 5).map((medal, index) => (
                                     <div key={index} className="relative">
                                         {/* the icon – it is the hover target, so it becomes the peer */}
@@ -946,16 +1029,16 @@ export default function ImuRank() {
                       loser: { y: 0, scale: 0.97, opacity: 0.6, boxShadow: '0px 0px 0px rgba(0,0,0,0)', transition: { duration: 0.4, ease: 'easeOut' }}
                     }}
                     initial={{opacity: 0, x: 50}}
-                    animate={winnerRevealed ? (winner?.address === wallet2.address ? 'winner' : 'loser') : 'initial'}
+                    animate={winnerRevealed ? (winner?.address === wallet2?.address ? 'winner' : 'loser') : 'initial'}
                     whileInView={{opacity: 1, x: 0}}
                     transition={{ duration: 0.5, ease: 'easeOut' }}
                   >
-                    {winnerRevealed && winner?.address === wallet2.address && <WinnerBadge />}
-                    <p className="font-mono text-gray-400 text-sm mb-4 truncate">{wallet2.address}</p>
-                    <RankDisplay rank={wallet2.stats.rank} />
+                    {winnerRevealed && winner?.address === wallet2?.address && <WinnerBadge />}
+                    <p className="font-mono text-gray-400 text-sm mb-4 truncate">{wallet2?.address}</p>
+                    <RankDisplay rank={wallet2?.stats.rank || ''} />
                     <div className="mt-6 border-t border-gray-700/50 pt-4 h-16 flex justify-center items-center">
                         <div className="flex justify-center items-center gap-2 flex-wrap">
-                            {wallet2.stats.achievedMedals?.length > 0 ? (
+                            {wallet2?.stats?.achievedMedals && wallet2.stats.achievedMedals.length > 0 ? (
                                 wallet2.stats.achievedMedals.slice(0, 5).map((medal, index) => (
                                     <div key={index} className="relative">
                                         {/* the icon – it is the hover target, so it becomes the peer */}
@@ -993,10 +1076,14 @@ export default function ImuRank() {
                 {/* Stats Comparison Table */}
                 <div className="mt-12 space-y-3">
                   <h3 className="text-lg font-semibold text-center text-gray-300 mb-4">Head-to-Head Stats</h3>
-                  <PvpStatCompare label="PNL" value1={wallet1.stats.pnl} value2={wallet2.stats.pnl} delay={1} statType="pnl" />
-                  <PvpStatCompare label="Win Rate" value1={wallet1.stats.winRate} value2={wallet2.stats.winRate} delay={2} statType="winRate" />
-                  <PvpStatCompare label="Best Trade" value1={`$${wallet1.stats.bestTrade?.toString().replace('$', '')}`} value2={`$${wallet2.stats.bestTrade?.toString().replace('$', '')}`} delay={3} statType="bestTrade" />
-                  <PvpStatCompare label="Avg Hold Time" value1={wallet1.stats.holdTime} value2={wallet2.stats.holdTime} delay={4} statType="holdTime" />
+                  {wallet1 && wallet2 && (
+                    <>
+                      <PvpStatCompare label="PNL" value1={wallet1.stats?.pnl || '$0'} value2={wallet2.stats?.pnl || '$0'} delay={1} statType="pnl" />
+                      <PvpStatCompare label="Win Rate" value1={wallet1.stats?.winRate || '0%'} value2={wallet2.stats?.winRate || '0%'} delay={2} statType="winRate" />
+                      <PvpStatCompare label="Best Trade" value1={`$${(wallet1.stats?.bestTrade || '0').toString().replace('$', '')}`} value2={`$${(wallet2.stats?.bestTrade || '0').toString().replace('$', '')}`} delay={3} statType="bestTrade" />
+                      <PvpStatCompare label="Avg Hold Time" value1={wallet1.stats?.holdTime || '0s'} value2={wallet2.stats?.holdTime || '0s'} delay={4} statType="holdTime" />
+                    </>
+                  )}
                 </div>
               </motion.div>
             ) : (
@@ -1009,7 +1096,7 @@ export default function ImuRank() {
                 className="w-full min-h-screen pt-12 pb-16"
               >
                 <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  {selectedWallet.stats.isInactive && <InactiveWalletAlert />}
+                  {selectedWallet?.stats?.isInactive && <InactiveWalletAlert />}
                   
                   {/* Page Header */}
                   <div className="flex justify-between items-center mb-8">
@@ -1041,16 +1128,16 @@ export default function ImuRank() {
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ type: "spring", stiffness: 200, damping: 15 }}
                             className={`text-8xl font-bold mb-2 bg-gradient-to-r ${
-                              selectedWallet.stats.rank === 'S+' ? 'from-purple-500 via-pink-500 to-purple-400' :
-                              selectedWallet.stats.rank === 'S' ? 'from-indigo-500 via-purple-500 to-indigo-400' :
-                              selectedWallet.stats.rank === 'A+' ? 'from-blue-500 via-cyan-500 to-blue-400' :
-                              selectedWallet.stats.rank === 'A' ? 'from-cyan-500 via-teal-500 to-cyan-400' :
-                              selectedWallet.stats.rank === 'B+' ? 'from-teal-500 via-green-500 to-teal-400' :
-                              selectedWallet.stats.rank === 'B' ? 'from-green-500 via-lime-500 to-green-400' :
+                              selectedWallet?.stats?.rank === 'S+' ? 'from-purple-500 via-pink-500 to-purple-400' :
+                              selectedWallet?.stats?.rank === 'S' ? 'from-indigo-500 via-purple-500 to-indigo-400' :
+                              selectedWallet?.stats?.rank === 'A+' ? 'from-blue-500 via-cyan-500 to-blue-400' :
+                              selectedWallet?.stats?.rank === 'A' ? 'from-cyan-500 via-teal-500 to-cyan-400' :
+                              selectedWallet?.stats?.rank === 'B+' ? 'from-teal-500 via-green-500 to-teal-400' :
+                              selectedWallet?.stats?.rank === 'B' ? 'from-green-500 via-lime-500 to-green-400' :
                               'from-red-500 via-red-600 to-red-400'
                             } bg-clip-text text-transparent animate-gradient-xy`}
                           >
-                            {selectedWallet.stats.rank}
+                            {selectedWallet?.stats?.rank}
                           </motion.div>
                           <div className="text-gray-400 text-xl tracking-wider mb-6">IMU RANK</div>
                         </div>
@@ -1059,13 +1146,13 @@ export default function ImuRank() {
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-gray-300 font-semibold">IMU Score</span>
                               <span className="text-white font-bold">
-                                {getRankScore(selectedWallet.stats)}%
+                                {selectedWallet?.stats ? getRankScore(selectedWallet.stats) : '0'}%
                               </span>
                             </div>
                             <div className="w-full h-4 bg-gray-700 rounded-full overflow-hidden">
                               <motion.div
                                 initial={{ width: 0 }}
-                                animate={{ width: `${getRankScore(selectedWallet.stats)}%` }}
+                                animate={{ width: `${selectedWallet?.stats ? getRankScore(selectedWallet.stats) : '0'}%` }}
                                 transition={{ 
                                   duration: 1,
                                   ease: "easeOut",
@@ -1124,8 +1211,8 @@ export default function ImuRank() {
 
                               {/* Position Indicator */}
                               {(() => {
-                                const getRankPosition = (rank) => {
-                                  const positions = {
+                                const getRankPosition = (rank: string) => {
+                                  const positions: Record<string, { left: string; color: string; label: string }> = {
                                     'S+': { left: '99%', color: 'rgb(168, 85, 247)', label: 'Elite (Top 1%)' },
                                     'S': { left: '95%', color: 'rgb(99, 102, 241)', label: 'Master (Top 5%)' },
                                     'A+': { left: '90%', color: 'rgb(59, 130, 246)', label: 'Expert (Top 10%)' },
@@ -1139,7 +1226,7 @@ export default function ImuRank() {
                                   return positions[rank] || { left: '10%', color: 'rgb(107, 114, 128)', label: 'Unranked' };
                                 };
 
-                                const { left, color, label } = getRankPosition(selectedWallet.stats.rank);
+                                const { left, color, label } = getRankPosition(selectedWallet?.stats?.rank || 'F');
                                 
                                 return (
                                   <motion.div 
@@ -1225,27 +1312,27 @@ export default function ImuRank() {
                           {/* Performance Summary */}
                           <div className="text-center space-y-3">
                             <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent group-hover:from-blue-300 group-hover:via-purple-300 group-hover:to-pink-300 transition-colors duration-300">
-                              {selectedWallet.stats.rank === 'S+' ? 'Elite' :
-                               selectedWallet.stats.rank === 'S' ? 'Master' :
-                               selectedWallet.stats.rank === 'A+' ? 'Expert' :
-                               selectedWallet.stats.rank === 'A' ? 'Professional' :
-                               selectedWallet.stats.rank === 'B+' ? 'Advanced' :
-                               selectedWallet.stats.rank === 'B' ? 'Competent' :
-                               selectedWallet.stats.rank === 'C+' ? 'Developing' :
-                               selectedWallet.stats.rank === 'C' ? 'Beginner' :
+                              {selectedWallet?.stats?.rank === 'S+' ? 'Elite' :
+                               selectedWallet?.stats?.rank === 'S' ? 'Master' :
+                               selectedWallet?.stats?.rank === 'A+' ? 'Expert' :
+                               selectedWallet?.stats?.rank === 'A' ? 'Professional' :
+                               selectedWallet?.stats?.rank === 'B+' ? 'Advanced' :
+                               selectedWallet?.stats?.rank === 'B' ? 'Competent' :
+                               selectedWallet?.stats?.rank === 'C+' ? 'Developing' :
+                               selectedWallet?.stats?.rank === 'C' ? 'Beginner' :
                                'Novice'} Trader
                             </div>
                             <div className="text-gray-400 text-sm max-w-md mx-auto group-hover:text-gray-300 transition-colors duration-300">
                               Your trading performance places you among the 
                               <span className="font-semibold text-white group-hover:text-gray-100 transition-colors duration-300"> {
-                                selectedWallet.stats.rank === 'S+' ? 'top 1%' :
-                                selectedWallet.stats.rank === 'S' ? 'top 5%' :
-                                selectedWallet.stats.rank === 'A+' ? 'top 10%' :
-                                selectedWallet.stats.rank === 'A' ? 'top 20%' :
-                                selectedWallet.stats.rank === 'B+' ? 'top 35%' :
-                                selectedWallet.stats.rank === 'B' ? 'top 50%' :
-                                selectedWallet.stats.rank === 'C+' ? 'bottom 35%' :
-                                selectedWallet.stats.rank === 'C' ? 'bottom 20%' :
+                                selectedWallet?.stats?.rank === 'S+' ? 'top 1%' :
+                                selectedWallet?.stats?.rank === 'S' ? 'top 5%' :
+                                selectedWallet?.stats?.rank === 'A+' ? 'top 10%' :
+                                selectedWallet?.stats?.rank === 'A' ? 'top 20%' :
+                                selectedWallet?.stats?.rank === 'B+' ? 'top 35%' :
+                                selectedWallet?.stats?.rank === 'B' ? 'top 50%' :
+                                selectedWallet?.stats?.rank === 'C+' ? 'bottom 35%' :
+                                selectedWallet?.stats?.rank === 'C' ? 'bottom 20%' :
                                 'bottom 10%'
                               } </span> 
                               of active Solana traders
@@ -1274,11 +1361,11 @@ export default function ImuRank() {
                             <div className="bg-gray-800/50 backdrop-blur-md rounded-xl p-6 border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
                               <div className="flex flex-col items-center">
                                 <span className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-white via-gray-200 to-gray-400">
-                                  {formatBalance(selectedWallet.stats.balance).split('(')[0]}
+                                  {selectedWallet?.stats?.balance ? formatBalance(selectedWallet.stats.balance).split('(')[0] : '0 SOL'}
                                 </span>
                                 <span className="text-gray-400 mt-2">Balance</span>
                                 <span className="text-sm text-gray-500">
-                                  ({formatBalance(selectedWallet.stats.balance).split('(')[1].replace(')', '')})
+                                  ({selectedWallet?.stats?.balance ? formatBalance(selectedWallet.stats.balance).split('(')[1]?.replace(')', '') || '' : '$0'})
                                 </span>
                               </div>
                             </div>
@@ -1287,11 +1374,11 @@ export default function ImuRank() {
                             <div className="bg-gray-800/50 backdrop-blur-md rounded-xl p-6 border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
                               <div className="flex flex-col items-center">
                                 <span className={`text-4xl font-bold ${
-                                  selectedWallet.stats.pnl?.startsWith('-') || parseFloat(selectedWallet.stats.pnl?.replace(/[$,]/g, '')) < 0 
+                                  selectedWallet?.stats?.pnl?.startsWith('-') || parseFloat(selectedWallet?.stats?.pnl?.replace(/[$,]/g, '') || '0') < 0 
                                     ? 'bg-clip-text text-transparent bg-gradient-to-br from-red-400 to-red-500' 
                                     : 'bg-clip-text text-transparent bg-gradient-to-br from-green-400 to-green-500'
                                 }`}>
-                                  {formatPNL(selectedWallet.stats.pnl)}
+                                  {selectedWallet?.stats?.pnl ? formatPNL(selectedWallet.stats.pnl) : '$0'}
                                 </span>
                                 <span className="text-gray-400 mt-2">Total PNL</span>
                               </div>
@@ -1301,7 +1388,7 @@ export default function ImuRank() {
                             <div className="bg-gray-800/50 backdrop-blur-md rounded-xl p-6 border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
                               <div className="flex flex-col items-center">
                                 <span className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-white via-gray-200 to-gray-400">
-                                  {selectedWallet.stats.tokensTraded || '0'}
+                                  {selectedWallet?.stats?.tokensTraded || '0'}
                                 </span>
                                 <span className="text-gray-400 mt-2">Tokens Traded</span>
                               </div>
@@ -1326,7 +1413,7 @@ export default function ImuRank() {
                               <span className="text-gray-400">Average Hold</span>
                             </div>
                             <div className="text-4xl font-bold text-green-400 mb-1">
-                              {selectedWallet.stats.holdTime}
+                              {selectedWallet?.stats?.holdTime || '0s'}
                             </div>
                             <div className="text-sm text-gray-500">Time per trade</div>
                           </div>
@@ -1340,7 +1427,7 @@ export default function ImuRank() {
                               <span className="text-gray-400">Best Trade</span>
                             </div>
                             <div className="text-4xl font-bold text-blue-400 mb-1">
-                              ${selectedWallet.stats.bestTrade?.toString().replace('$', '')}
+                              ${(selectedWallet?.stats?.bestTrade || '0').toString().replace('$', '')}
                             </div>
                             <div className="text-sm text-gray-500">Highest profit</div>
                           </div>
@@ -1354,7 +1441,7 @@ export default function ImuRank() {
                               <span className="text-gray-400">Win Rate</span>
                             </div>
                             <div className="text-4xl font-bold text-yellow-400 mb-1">
-                              {selectedWallet.stats.winRate}
+                              {selectedWallet?.stats?.winRate || '0%'}
                             </div>
                             <div className="text-sm text-gray-500">Success rate</div>
                           </div>
@@ -1370,7 +1457,7 @@ export default function ImuRank() {
                         <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
                           {/* PNL Medals */}
                           {(() => {
-                            const pnlValue = parseFloat(selectedWallet.stats.pnl?.replace(/[^0-9.-]/g, '') || '0');
+                            const pnlValue = parseFloat(selectedWallet?.stats?.pnl?.replace(/[^0-9.-]/g, '') || '0');
                             const pnlMedals = [
                               {
                                 threshold: 1000000,
@@ -1431,7 +1518,7 @@ export default function ImuRank() {
 
                           {/* Volume Medals */}
                           {(() => {
-                            const tokenCount = selectedWallet.stats.tokensTraded;
+                            const tokenCount = parseInt(selectedWallet?.stats?.tokensTraded || '0') || 0;
                             const volumeMedals = [
                               {
                                 threshold: 2000,
@@ -1601,15 +1688,20 @@ export default function ImuRank() {
           isOpen={shareModalOpen}
           onClose={() => setShareModalOpen(false)}
           stats={{
-            address: selectedWallet.address,
-            rank: selectedWallet.stats.rank,
-            pnl: selectedWallet.stats.pnl,
-            winRate: selectedWallet.stats.winRate,
-            tokensTraded: selectedWallet.stats.tokensTraded,
-            bestTrade: selectedWallet.stats.bestTrade,
-            holdTime: selectedWallet.stats.holdTime,
+            address: selectedWallet?.address || '',
+            rank: selectedWallet?.stats?.rank || 'F',
+            pnl: selectedWallet?.stats?.pnl || '$0',
+            winRate: selectedWallet?.stats?.winRate || '0%',
+            tokensTraded: selectedWallet?.stats?.tokensTraded || '0',
+            bestTrade: selectedWallet?.stats?.bestTrade || '0',
+            holdTime: selectedWallet?.stats?.holdTime || '0s',
             achievedMedals: (() => {
-              const medals = [];
+              const medals: Array<{
+                icon: React.ComponentType<any>;
+                color: string;
+                name: string;
+                desc: string;
+              }> = [];
               const pnlValue = parseFloat(selectedWallet?.stats?.pnl?.replace(/[^0-9.-]/g, '') || '0');
               const winRate = parseFloat(selectedWallet?.stats?.winRate?.replace('%', '') || '0');
               const tokenCount = parseInt(selectedWallet?.stats?.tokensTraded || '0');
@@ -1617,8 +1709,18 @@ export default function ImuRank() {
               const holdTime = parseInt(selectedWallet?.stats?.holdTime || '0');
 
               // rest of the medals logic...
-              if (pnlValue >= 1000000) medals.push({ icon: Diamond, color: 'from-purple-600 to-pink-400' });
-              // etc...
+              if (pnlValue >= 1000000) medals.push({ icon: Diamond, color: 'from-purple-600 to-pink-400', name: 'Diamond Trader', desc: '$1M+ Profit' });
+              if (pnlValue >= 500000) medals.push({ icon: Crown, color: 'from-indigo-400 to-purple-500', name: 'Platinum Trader', desc: '$500K+ Profit' });
+              if (pnlValue >= 100000) medals.push({ icon: Trophy, color: 'from-yellow-400 to-amber-500', name: 'Gold Trader', desc: '$100K+ Profit' });
+              if (pnlValue >= 50000) medals.push({ icon: Medal, color: 'from-gray-300 to-gray-400', name: 'Silver Trader', desc: '$50K+ Profit' });
+              if (tokenCount >= 2000) medals.push({ icon: Rocket, color: 'from-red-500 to-orange-400', name: 'Trading Machine', desc: '2000+ Trades' });
+              if (tokenCount >= 1000) medals.push({ icon: LineChart, color: 'from-green-400 to-emerald-500', name: 'Sharp Trader', desc: '1000+ Trades' });
+              if (tokenCount >= 500) medals.push({ icon: TrendingUp, color: 'from-blue-400 to-cyan-500', name: 'Active Trader', desc: '500+ Trades' });
+              if (bestTradeValue >= 50000) medals.push({ icon: Target, color: 'from-purple-500 to-pink-500', name: 'Legendary Trade', desc: '$50K+ Trade' });
+              if (bestTradeValue >= 25000) medals.push({ icon: Flame, color: 'from-blue-500 to-indigo-500', name: 'Master Trade', desc: '$25K+ Trade' });
+              if (bestTradeValue >= 10000) medals.push({ icon: Award, color: 'from-cyan-400 to-blue-500', name: 'Expert Trade', desc: '$10K+ Trade' });
+              if (winRate >= 65) medals.push({ icon: Trophy, color: 'from-emerald-400 to-teal-500', name: 'Consistency King', desc: '65%+ Win Rate' });
+              if (holdTime <= 10) medals.push({ icon: Timer, color: 'from-amber-400 to-orange-500', name: 'Speed Demon', desc: 'Sub 10s Trades' });
 
               return medals;
             })()
@@ -1629,7 +1731,11 @@ export default function ImuRank() {
   );
 }
 
-const StatsComparison = ({ label, value1, value2 }: { label: string, value1: any, value2: any }) => (
+const StatsComparison = ({ label, value1, value2 }: { 
+  label: string; 
+  value1: string | number; 
+  value2: string | number; 
+}) => (
   <div className="flex justify-between items-center bg-gray-700/50 rounded-lg p-4">
     <div className="text-left flex-1">{value1}</div>
     <div className="text-gray-400 px-4">{label}</div>
@@ -1637,9 +1743,14 @@ const StatsComparison = ({ label, value1, value2 }: { label: string, value1: any
   </div>
 );
 
-const StatBox = ({ label, value, isProfit, className = "" }: { label: string, value: any, isProfit: boolean, className?: string }) => {
-  const isPositive = isProfit && value && value.includes('+');
-  const isNegative = isProfit && value && value.includes('-');
+const StatBox = ({ label, value, isProfit, className = "" }: { 
+  label: string; 
+  value: string | number; 
+  isProfit: boolean; 
+  className?: string; 
+}) => {
+  const isPositive = isProfit && value && value.toString().includes('+');
+  const isNegative = isProfit && value && value.toString().includes('-');
   
   return (
     <motion.div 
@@ -1658,7 +1769,13 @@ const StatBox = ({ label, value, isProfit, className = "" }: { label: string, va
   );
 };
 
-const ComparisonStat = ({ label, value1, value2, isPnl = false, delay = 0 }: { label: string, value1: any, value2: any, isPnl?: boolean, delay?: number }) => (
+const ComparisonStat = ({ label, value1, value2, isPnl = false, delay = 0 }: { 
+  label: string; 
+  value1: string | number; 
+  value2: string | number; 
+  isPnl?: boolean; 
+  delay?: number; 
+}) => (
   <motion.div
     className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-4 border border-gray-700/30"
     initial={{ y: 20, opacity: 0 }}

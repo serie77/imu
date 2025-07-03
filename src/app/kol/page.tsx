@@ -133,11 +133,61 @@ interface GMGNData {
   redTrades?: number;
   winStreak?: string;
   avgTradeSize?: string;
-  topTrades?: any[];
+  topTrades?: Array<{
+    tokenName: string;
+    tokenImage: string;
+    tokenCA: string;
+    realizedProfit: string;
+    pnlPercentage: string;
+    timestamp: string;
+  }>;
   realizedProfits?: string;
   totalCost?: string;
   tokenAvgCost?: string;
 }
+
+interface VoteNotification {
+  id: number;
+  message: string;
+  type: 'up' | 'down' | 'error' | 'success';
+  isOwnVote?: boolean;
+}
+
+// Add proper interfaces at the top of the file, after the existing interfaces
+
+interface KOL {
+  id?: string;
+  name: string;
+  solana_address: string;
+  twitter?: string;
+  profile_picture?: string;
+  banner_url?: string;
+  tags?: string[];
+  links?: Array<{
+    type: string;
+    url: string;
+  }>;
+  communityNotes?: string[];
+  tradingStyle?: string[];
+}
+
+interface Comment {
+  id: string;
+  author_wallet: string;
+  message: string;
+  timestamp: string;
+}
+
+interface Vote {
+  kol_address: string;
+  net_votes: number;
+  vote_type: 'up' | 'down';
+  kol_name?: string;
+  wallet?: string;
+}
+
+// Add this type assertion right after the import:
+const typedKolData = kolData as KOL[];
 
 export default function KOLPage() {
   const { publicKey, connected, signMessage } = useWallet();
@@ -146,12 +196,12 @@ export default function KOLPage() {
   // State for votes: { [address]: count }
   const [kolVotes, setKolVotes] = useState<{ [key: string]: number }>({});
   // State for selected KOL for popup
-  const [selectedKOL, setSelectedKOL] = useState<any | null>(null);
+  const [selectedKOL, setSelectedKOL] = useState<KOL | null>(null);
   // State for vote notifications
-  const [voteNotifications, setVoteNotifications] = useState<any[]>([]);
+  const [voteNotifications, setVoteNotifications] = useState<VoteNotification[]>([]);
   // Add these state variables to your component
-  const [mostLikedKOL, setMostLikedKOL] = useState(null);
-  const [leastLikedKOL, setLeastLikedKOL] = useState(null);
+  const [mostLikedKOL, setMostLikedKOL] = useState<KOL | null>(null);
+  const [leastLikedKOL, setLeastLikedKOL] = useState<KOL | null>(null);
   // Add state to track which KOLs the user has voted for
   const [userVotedKOLs, setUserVotedKOLs] = useState<{ [key: string]: 'up' | 'down' }>({});
   // Add state for search and sorting
@@ -164,7 +214,7 @@ export default function KOLPage() {
   const [gmgnError, setGmgnError] = useState<string | null>(null);
 
   // New State for Profile Modal & Comments
-  const [comments, setComments] = useState<any[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [commentError, setCommentError] = useState("");
@@ -248,8 +298,8 @@ export default function KOLPage() {
       
       if (data.success && Array.isArray(data.votes)) {
         // Convert the votes array to the format your component expects
-        const votesObj = {};
-        data.votes.forEach(vote => {
+        const votesObj: { [key: string]: number } = {};
+        data.votes.forEach((vote: Vote) => {
           votesObj[vote.kol_address] = vote.net_votes;
         });
         
@@ -291,8 +341,8 @@ export default function KOLPage() {
       
       if (data.success && Array.isArray(data.votes)) {
         // Convert to the format your component expects
-        const userVotesObj = {};
-        data.votes.forEach((vote: any) => {
+        const userVotesObj: { [key: string]: 'up' | 'down' } = {};
+        data.votes.forEach((vote: Vote) => {
           userVotesObj[vote.kol_address] = vote.vote_type;
         });
         
@@ -339,15 +389,15 @@ export default function KOLPage() {
     }
 
     return {
-      mostLikedKOL: mostLikedAddr ? kolData.find(k => k.solana_address === mostLikedAddr) : null,
-      leastLikedKOL: leastLikedAddr ? kolData.find(k => k.solana_address === leastLikedAddr) : null,
+      mostLikedKOL: mostLikedAddr ? typedKolData.find((k: KOL) => k.solana_address === mostLikedAddr) || null : null,
+      leastLikedKOL: leastLikedAddr ? typedKolData.find((k: KOL) => k.solana_address === leastLikedAddr) || null : null,
     };
   }, [kolVotes]);
 
   // Hardcoded Most/Least Profitable KOLs (as requested)
   // Replace with dynamic fetching/calculation if needed later
-  const mostProfitableKOL = useMemo(() => kolData.find(k => k.name === "West"), []); // Example
-  const leastProfitableKOL = useMemo(() => kolData.find(k => k.name === "Pow"), []); // Example
+  const mostProfitableKOL = useMemo(() => typedKolData.find((k: KOL) => k.name === "West") || null, []); // Example
+  const leastProfitableKOL = useMemo(() => typedKolData.find((k: KOL) => k.name === "Pow") || null, []); // Example
 
   // --- Handlers ---
 
@@ -357,10 +407,10 @@ export default function KOLPage() {
       // Check if wallet is connected
       if (!connected || !publicKey) {
         // Show notification to connect wallet
-        const newNotification = {
+        const newNotification: VoteNotification = {
           id: Date.now(),
           message: "Please connect your wallet to vote",
-          type: "error",
+          type: "error" as const,
         };
         setVoteNotifications(prev => [...prev.slice(-4), newNotification]);
         return;
@@ -408,11 +458,11 @@ export default function KOLPage() {
         });
         
         // Find the KOL name
-        const kol = kolData.find(k => k.solana_address === address);
+        const kol = typedKolData.find((k: KOL) => k.solana_address === address);
         
         if (kol) {
           // Show notification for your own vote
-          const newNotification = {
+          const newNotification: VoteNotification = {
             id: Date.now(),
             message: `You have ${voteType === 'up' ? 'upvoted' : 'downvoted'} ${kol.name}`,
             type: voteType,
@@ -426,8 +476,8 @@ export default function KOLPage() {
         
         // Store user's votes in localStorage for persistence
         if (typeof window !== 'undefined') {
-          const userVotes = JSON.parse(localStorage.getItem('userVotes') || '[]');
-          const existingVoteIndex = userVotes.findIndex(v => v.kolAddress === address);
+          const userVotes = JSON.parse(localStorage.getItem('userVotes') || '[]') as Array<{kolAddress: string, voteType: 'up' | 'down'}>;
+          const existingVoteIndex = userVotes.findIndex((v: {kolAddress: string, voteType: 'up' | 'down'}) => v.kolAddress === address);
           
           if (existingVoteIndex >= 0) {
             // Update existing vote
@@ -441,27 +491,27 @@ export default function KOLPage() {
         }
       } else {
         // Show error notification
-        const newNotification = {
+        const newNotification: VoteNotification = {
           id: Date.now(),
           message: data.message || "Error recording vote",
-          type: "error",
+          type: "error" as const,
         };
         setVoteNotifications(prev => [...prev.slice(-4), newNotification]);
       }
     } catch (error) {
       console.error('Error submitting vote:', error);
       // Show error notification
-      const newNotification = {
+      const newNotification: VoteNotification = {
         id: Date.now(),
         message: "Error submitting vote",
-        type: "error",
+        type: "error" as const,
       };
       setVoteNotifications(prev => [...prev.slice(-4), newNotification]);
     }
   };
 
   // Handle selecting a KOL to view profile
-  const handleSelectKOL = (kol: any) => {
+  const handleSelectKOL = (kol: KOL) => {
     if (!kol || !kol.solana_address) {
       console.error("Invalid KOL object passed to handleSelectKOL:", kol);
       return;
@@ -480,19 +530,19 @@ export default function KOLPage() {
   };
 
   // Update the updateMostLeastLikedKOLs function to be more robust
-  const updateMostLeastLikedKOLs = (votesObj: any) => {
+  const updateMostLeastLikedKOLs = (votesObj: { [key: string]: number }) => {
     console.log('Updating most/least liked KOLs with votes:', votesObj);
     
     // Find KOL with highest vote count
     let highestVotes = -Infinity;
-    let highestVotesKOL = null;
+    let highestVotesKOL: KOL | null = null;
     
     // Find KOL with lowest vote count
     let lowestVotes = Infinity;
-    let lowestVotesKOL = null;
+    let lowestVotesKOL: KOL | null = null;
     
     // Iterate through all KOLs
-    kolData.forEach((kol: any) => {
+    typedKolData.forEach((kol: KOL) => {
       const votes = votesObj[kol.solana_address] || 0;
       
       if (votes > highestVotes) {
@@ -532,10 +582,10 @@ export default function KOLPage() {
           }
           
           // Add notification for other people's votes
-          const newNotification = {
+          const newNotification: VoteNotification = {
             id: Date.now(),
             message: `${data.vote.wallet.slice(0, 6)}...${data.vote.wallet.slice(-4)} ${data.vote.vote_type === 'up' ? 'upvoted' : 'downvoted'} ${data.vote.kol_name || 'Unknown KOL'}`,
-            type: data.vote.vote_type,
+            type: data.vote.vote_type as 'up' | 'down',
             isOwnVote: false, // Mark as someone else's vote
           };
           setVoteNotifications(prev => [...prev.slice(-4), newNotification]);
@@ -589,15 +639,15 @@ export default function KOLPage() {
   // Add a function to filter and sort KOLs
   const getFilteredAndSortedKOLs = () => {
     // Filter by tag first
-    let filtered = kolData;
+    let filtered: KOL[] = typedKolData;
     if (activeTag !== 'All') {
-      filtered = kolData.filter(kol => kol.tags && kol.tags.includes(activeTag));
+      filtered = typedKolData.filter((kol: KOL) => kol.tags && kol.tags.includes(activeTag));
     }
     
     // Then filter by search term
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase().trim();
-      filtered = filtered.filter(kol => 
+      filtered = filtered.filter((kol: KOL) => 
         kol.name.toLowerCase().includes(term) || 
         kol.solana_address.toLowerCase().includes(term) ||
         (kol.twitter && kol.twitter.toLowerCase().includes(term))
@@ -605,7 +655,7 @@ export default function KOLPage() {
     }
     
     // Then sort
-    return filtered.sort((a, b) => {
+    return filtered.sort((a: KOL, b: KOL) => {
       if (sortOption === 'votes') return (kolVotes[b.solana_address] || 0) - (kolVotes[a.solana_address] || 0);
       if (sortOption === 'name') return a.name.localeCompare(b.name);
       return 0;
@@ -795,13 +845,13 @@ export default function KOLPage() {
       return;
     }
 
-    console.log(`[COMMENTS] Submitting comment for KOL: ${selectedKOL.solana_address}`);
+    console.log(`[COMMENTS] Submitting comment for KOL: ${selectedKOL?.solana_address}`);
     try {
       const response = await fetch('/api/kol/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          kol_address: selectedKOL.solana_address,
+          kol_address: selectedKOL?.solana_address,
           author_wallet: publicKey.toString(),
           message: newComment,
         }),
@@ -811,13 +861,15 @@ export default function KOLPage() {
       if (data.success) {
         console.log(`[COMMENTS] Comment submitted successfully`);
         // Refresh comments
-        fetchComments(selectedKOL.solana_address);
+        if (selectedKOL) {
+          fetchComments(selectedKOL.solana_address);
+        }
         setNewComment("");
         setCommentError("");
       } else {
         setCommentError(data.error || "Failed to post comment.");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("[COMMENTS] Error submitting comment:", error);
       setCommentError("Failed to post comment. Please try again.");
     }
@@ -854,7 +906,7 @@ export default function KOLPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          kol_address: selectedKOL.solana_address,
+          kol_address: selectedKOL?.solana_address,
           submitter_wallet: publicKey.toString(),
           note: communityNote,
         }),
@@ -867,16 +919,16 @@ export default function KOLPage() {
         setShowCommunityNoteModal(false);
         
         // Show multiple notifications for better visibility
-        const successNotification = {
+        const successNotification: VoteNotification = {
           id: Date.now(),
           message: "✅ Community note submitted successfully!",
-          type: "success",
+          type: "success" as const,
         };
         
-        const reviewNotification = {
+        const reviewNotification: VoteNotification = {
           id: Date.now() + 1,
           message: "⏰ IMU team will review your note within 1 hour",
-          type: "success",
+          type: "success" as const,
         };
         
         setVoteNotifications(prev => [
@@ -891,7 +943,7 @@ export default function KOLPage() {
       } else {
         setCommunityNoteError(data.error || "Failed to submit note.");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error submitting community note:", error);
       setCommunityNoteError("Failed to submit note. Please try again.");
     } finally {
@@ -1080,7 +1132,7 @@ export default function KOLPage() {
             <div className="grid grid-cols-1 gap-4 max-h-[65vh] overflow-y-auto pr-2">
               {filteredKOLs.map((kol, index) => (
                 <KOLListItem
-                  key={kol.id || index}
+                  key={kol.id || `kol-${index}`}
                   kol={kol}
                   voteCount={kolVotes[kol.solana_address] || 0}
                   onVote={handleVote}
@@ -1224,7 +1276,7 @@ export default function KOLPage() {
 // --- Component Definitions ---
 
 // Notification Area Component
-const NotificationArea = ({ notifications }: { notifications: any[] }) => (
+const NotificationArea = ({ notifications }: { notifications: VoteNotification[] }) => (
   <div className="space-y-2">
     <AnimatePresence>
       {notifications.map((notification) => (
@@ -1264,6 +1316,15 @@ const NotificationArea = ({ notifications }: { notifications: any[] }) => (
 const FeaturedKOLCard = ({
   kol, votes, label, icon: Icon,
   color, bgColor, borderColor, onSelect
+}: {
+  kol: KOL | null;
+  votes: number | undefined;
+  label: string;
+  icon: React.ComponentType<any>;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+  onSelect: (kol: KOL) => void;
 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -1330,7 +1391,14 @@ const FeaturedKOLCard = ({
 );
 
 // KOL List Item Component
-const KOLListItem = ({ kol, voteCount, onVote, onSelect, userVoted, userHasToken }) => (
+const KOLListItem = ({ kol, voteCount, onVote, onSelect, userVoted, userHasToken }: { 
+  kol: KOL, 
+  voteCount: number, 
+  onVote: (address: string, type: 'up' | 'down') => void, 
+  onSelect: (kol: KOL) => void, 
+  userVoted: string | undefined, 
+  userHasToken: boolean 
+}) => (
   <motion.div
     className="flex items-center justify-between p-4 bg-gray-800/30 backdrop-blur-sm rounded-2xl 
                border border-transparent hover:border-purple-500/30 transition-all duration-200 cursor-pointer"
@@ -1537,7 +1605,24 @@ const KOLProfileModal = ({
   loadingGMGNData,
   selectedKOLData,
   gmgnError,
-  onShowCommunityNoteModal // Add this prop
+  onShowCommunityNoteModal
+}: {
+  kol: KOL;
+  voteCount: number;
+  comments: Comment[];
+  loadingComments: boolean;
+  onClose: () => void;
+  onVote: (address: string, type: 'up' | 'down') => void;
+  onCommentSubmit: () => void;
+  newComment: string;
+  setNewComment: (value: string) => void;
+  commentError: string;
+  userHasToken: boolean;
+  onShowEditInfo: () => void;
+  loadingGMGNData: boolean;
+  selectedKOLData: GMGNData | null;
+  gmgnError: string | null;
+  onShowCommunityNoteModal: () => void;
 }) => {
     const { connected, publicKey } = useWallet();
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -1702,7 +1787,7 @@ const KOLProfileModal = ({
                     </motion.a>
                   )}
                   
-                  {kol.links?.map((link, index) => (
+                  {kol.links?.map((link: { type: string; url: string }, index: number) => (
                     <motion.a 
                       key={`${link.type}-${index}`} 
                       href={link.url} 
@@ -1767,7 +1852,7 @@ const KOLProfileModal = ({
                       </span>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      {kol.tags?.map(tag => (
+                      {kol.tags?.map((tag: string) => (
                         <span key={tag} className="text-xs bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur-sm border border-purple-700/30 px-3 py-1 rounded-full">
                           {tag}
                         </span>
@@ -1813,7 +1898,7 @@ const KOLProfileModal = ({
                   {/* Community Notes Display */}
                   <div className="space-y-3">
                     {kol.communityNotes && kol.communityNotes.length > 0 ? (
-                      kol.communityNotes.map((note, index) => (
+                      kol.communityNotes.map((note: string, index: number) => (
                         <div 
                           key={index}
                           className="bg-gray-900/40 rounded-lg p-3 border border-gray-700/50"
@@ -1844,7 +1929,7 @@ const KOLProfileModal = ({
                   {kol.tradingStyle && (
                     <div className="mt-4 pt-4 border-t border-gray-700/50">
                       <div className="flex flex-wrap gap-2">
-                        {kol.tradingStyle.map((style, index) => (
+                        {kol.tradingStyle.map((style: string, index: number) => (
                           <span 
                             key={index}
                             className="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-1 rounded-full"
@@ -2008,9 +2093,9 @@ const KOLProfileModal = ({
                               </div>
                             </div>
                           ) : comments.length > 0 ? (
-                            comments.map((comment, i) => (
+                            comments.map((comment: Comment, i: number) => (
                               <motion.div 
-                                key={i} 
+                                key={comment.id || i}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.05 }}
