@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      votes: votes.map(vote => ({
+      votes: votes.map((vote: any) => ({
         kol_address: vote.kol_address,
         vote_type: vote.vote_type
       }))
