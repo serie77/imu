@@ -16,7 +16,7 @@ const isValidSolanaAddress = (address: string) => {
 const HELIUS_API_KEY = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
 
 // Utility to decode obfuscated selectors
-const decodeSelectors = (hash) => {
+const decodeSelectors = (hash: string) => {
   // Decode logic here
   return JSON.parse(atob(hash));
 };

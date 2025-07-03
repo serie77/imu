@@ -483,7 +483,7 @@ export default function MarketStatsPage() {
   });
 
   // Helper function to get color based on bot name
-  const getBotColor = (name) => {
+  const getBotColor = (name: string) => {
     switch (name) {
       case 'Axiom': return '#FF6B6B';
       case 'Photon': return '#4ECDC4';
@@ -495,7 +495,7 @@ export default function MarketStatsPage() {
   };
 
   // Helper function to format values
-  const formatValue = (value) => {
+  const formatValue = (value: number) => {
     if (!value) return "0";
     const millions = value / 1000000;
     
@@ -1645,7 +1645,7 @@ export default function MarketStatsPage() {
   );
 }
 // And add this function to toggle bot visibility if it doesn't exist
-const toggleBotVisibility = (botName) => {
+const toggleBotVisibility = (botName: string) => {
   setVisibleBots(prev => ({
     ...prev,
     [botName]: !prev[botName]

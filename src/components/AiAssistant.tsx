@@ -86,7 +86,9 @@ const AiAssistant = () => {
   
   // Track mouse position for eye movement
   useEffect(() => {
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!characterRef.current) return;
+      
       // Calculate normalized position (-1 to 1)
       const x = (e.clientX / window.innerWidth) * 2 - 1;
       const y = (e.clientY / window.innerHeight) * 2 - 1;
@@ -119,7 +121,7 @@ const AiAssistant = () => {
   }, [isTyping, typingText, fullText, typingSpeed]);
   
   // Start typing animation with given text
-  const startTypingAnimation = (text) => {
+  const startTypingAnimation = (text: string) => {
     setFullText(text);
     setTypingText("");
     setIsTyping(true);
@@ -177,7 +179,7 @@ const AiAssistant = () => {
   ];
   
   // Handle prompt selection
-  const handlePromptSelection = (prompt) => {
+  const handlePromptSelection = (prompt: any) => {
     setSelectedInfo(null); // Clear previous info
     
     switch(prompt.action) {
@@ -214,7 +216,7 @@ const AiAssistant = () => {
   };
   
   // Handle navigation
-  const handleNavigation = (path) => {
+  const handleNavigation = (path: string) => {
     router.push(path);
     setIsChatOpen(false);
   };

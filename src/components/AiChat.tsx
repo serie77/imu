@@ -92,7 +92,7 @@ const AiChat = ({
     }
   }, [typingMessage, typingIndex, typingSpeed]);
 
-  const startTypingAnimation = (message) => {
+  const startTypingAnimation = (message: any) => {
     setTypingMessage(message);
     setTypingIndex(0);
   };
@@ -128,7 +128,7 @@ const AiChat = ({
     }
   };
   
-  const handleSpecialCommands = (command) => {
+  const handleSpecialCommands = (command: string) => {
     const cmd = command.toLowerCase();
     
     if (cmd.startsWith('/name ')) {
@@ -166,14 +166,14 @@ const AiChat = ({
     }
   };
   
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
   
-  const getAIResponse = (userInput) => {
+  const getAIResponse = (userInput: string) => {
     const input = userInput.toLowerCase();
     
     if (input.includes('hello') || input.includes('hi') || input.includes('hey')) {
@@ -193,7 +193,7 @@ const AiChat = ({
     }
   };
   
-  const getResponseOptions = (userInput) => {
+  const getResponseOptions = (userInput: string) => {
     const input = userInput.toLowerCase();
     
     if (input.includes('nft')) {
@@ -216,7 +216,7 @@ const AiChat = ({
     }
   };
   
-  const handleOptionClick = (option) => {
+  const handleOptionClick = (option: any) => {
     if (option.action === "navigate") {
       onNavigate(option.path);
       onClose();

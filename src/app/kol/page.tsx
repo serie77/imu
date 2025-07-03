@@ -271,7 +271,7 @@ export default function KOLPage() {
   };
 
   // Add this function to check user's votes when they connect their wallet
-  const fetchUserVotes = async (walletAddress) => {
+  const fetchUserVotes = async (walletAddress: string) => {
     if (!walletAddress) return;
     
     try {
@@ -292,14 +292,14 @@ export default function KOLPage() {
       if (data.success && Array.isArray(data.votes)) {
         // Convert to the format your component expects
         const userVotesObj = {};
-        data.votes.forEach(vote => {
+        data.votes.forEach((vote: any) => {
           userVotesObj[vote.kol_address] = vote.vote_type;
         });
         
         console.log('Processed user votes:', userVotesObj);
         setUserVotedKOLs(userVotesObj);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching user votes:', error);
     }
   };
@@ -461,7 +461,7 @@ export default function KOLPage() {
   };
 
   // Handle selecting a KOL to view profile
-  const handleSelectKOL = (kol) => {
+  const handleSelectKOL = (kol: any) => {
     if (!kol || !kol.solana_address) {
       console.error("Invalid KOL object passed to handleSelectKOL:", kol);
       return;
@@ -480,7 +480,7 @@ export default function KOLPage() {
   };
 
   // Update the updateMostLeastLikedKOLs function to be more robust
-  const updateMostLeastLikedKOLs = (votesObj) => {
+  const updateMostLeastLikedKOLs = (votesObj: any) => {
     console.log('Updating most/least liked KOLs with votes:', votesObj);
     
     // Find KOL with highest vote count
@@ -492,7 +492,7 @@ export default function KOLPage() {
     let lowestVotesKOL = null;
     
     // Iterate through all KOLs
-    kolData.forEach(kol => {
+    kolData.forEach((kol: any) => {
       const votes = votesObj[kol.solana_address] || 0;
       
       if (votes > highestVotes) {
@@ -767,7 +767,7 @@ export default function KOLPage() {
 
   // --- New Handlers ---
 
-  const fetchComments = async (kolAddress) => {
+  const fetchComments = async (kolAddress: string) => {
     console.log(`[COMMENTS] Fetching comments for KOL: ${kolAddress}`);
     setLoadingComments(true);
     try {
@@ -775,7 +775,7 @@ export default function KOLPage() {
       const data = await response.json();
       console.log(`[COMMENTS] Fetched ${data.comments?.length || 0} comments`);
       if (data.success) setComments(data.comments);
-    } catch (error) {
+    } catch (error: any) {
       console.error("[COMMENTS] Error fetching comments:", error);
       setComments([]);
     } finally {
@@ -817,13 +817,13 @@ export default function KOLPage() {
       } else {
         setCommentError(data.error || "Failed to post comment.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("[COMMENTS] Error submitting comment:", error);
       setCommentError("Failed to post comment. Please try again.");
     }
   };
   
-  const handleTagFilterToggle = (tag) => {
+  const handleTagFilterToggle = (tag: string) => {
     setActiveTagFilters(prev => 
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
     );
@@ -891,7 +891,7 @@ export default function KOLPage() {
       } else {
         setCommunityNoteError(data.error || "Failed to submit note.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting community note:", error);
       setCommunityNoteError("Failed to submit note. Please try again.");
     } finally {
@@ -1224,7 +1224,7 @@ export default function KOLPage() {
 // --- Component Definitions ---
 
 // Notification Area Component
-const NotificationArea = ({ notifications }) => (
+const NotificationArea = ({ notifications }: { notifications: any[] }) => (
   <div className="space-y-2">
     <AnimatePresence>
       {notifications.map((notification) => (
