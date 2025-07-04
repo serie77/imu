@@ -32,17 +32,20 @@ export default async function handler(req, res) {
     
     try {
       log('About to launch Puppeteer...');
+      const execPath = await chromium.executablePath();
+      log('Chromium executable path:', execPath);
       browser = await puppeteer.launch({
         args: [
           ...chromium.args,
           '--disable-dev-shm-usage',
+          '--no-sandbox',
           '--no-first-run',
           '--no-zygote',
           '--single-process',
           '--disable-extensions'
         ],
         defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
+        executablePath: execPath,
         headless: chromium.headless,
         ignoreHTTPSErrors: true,
         timeout: 30000,
