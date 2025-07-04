@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, Db } from 'mongodb';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -7,10 +7,10 @@ if (!MONGODB_URI) {
 }
 
 // Extract database name from the URI or use a default
-const getDbName = (uri) => {
+const getDbName = (uri: string): string => {
   try {
     // Try to extract DB name from URI
-    const dbName = uri.split('/').pop().split('?')[0];
+    const dbName = uri.split('/').pop()?.split('?')[0];
     return dbName || 'kol_database';
   } catch (error) {
     // Default database name
@@ -18,8 +18,8 @@ const getDbName = (uri) => {
   }
 };
 
-let cachedClient = null;
-let cachedDb = null;
+let cachedClient: MongoClient | null = null;
+let cachedDb: Db | null = null;
 
 export async function connectToDatabase() {
   try {
@@ -29,16 +29,16 @@ export async function connectToDatabase() {
     }
 
     console.log('Creating new database connection');
-    console.log('MongoDB URI:', MONGODB_URI.replace(/:[^:]*@/, ':****@')); // Log URI with password hidden
+    console.log('MongoDB URI:', MONGODB_URI!.replace(/:[^:]*@/, ':****@')); // Log URI with password hidden
     
     // Try to connect with more detailed error handling
-    let client;
+    let client: MongoClient;
     try {
-      client = await MongoClient.connect(MONGODB_URI, {
+      client = await MongoClient.connect(MONGODB_URI!, {
         connectTimeoutMS: 10000, // 10 seconds
         socketTimeoutMS: 45000, // 45 seconds
       });
-    } catch (connectError) {
+    } catch (connectError: any) {
       console.error('MongoDB connection error details:', {
         name: connectError.name,
         message: connectError.message,
@@ -48,7 +48,7 @@ export async function connectToDatabase() {
       throw new Error(`Failed to connect to MongoDB: ${connectError.message}`);
     }
     
-    const dbName = getDbName(MONGODB_URI);
+    const dbName = getDbName(MONGODB_URI!);
     console.log('Using database:', dbName);
     
     const db = client.db(dbName);
@@ -57,7 +57,7 @@ export async function connectToDatabase() {
     try {
       await db.listCollections().toArray();
       console.log('Database connection successful');
-    } catch (testError) {
+    } catch (testError: any) {
       console.error('Failed to list collections:', testError);
       throw new Error(`Connected to MongoDB but failed to list collections: ${testError.message}`);
     }
@@ -66,7 +66,7 @@ export async function connectToDatabase() {
     cachedDb = db;
 
     return { client, db };
-  } catch (error) {
+  } catch (error: any) {
     console.error('MongoDB connection error:', error);
     throw error;
   }
