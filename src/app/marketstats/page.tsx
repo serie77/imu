@@ -551,10 +551,10 @@ export default function MarketStatsPage() {
     const chartData = [];
 
     // --- Create lookup maps for efficient data retrieval ---
-    const createVolumeMap = (botKey: string) => {
+    const createVolumeMap = (botKey: string): Map<string, any> => {
       const rows = tradingBotData[botKey]?.result?.rows || [];
       // Map: "YYYY-MM-DD HH:MM:SS.sss UTC" -> avg_daily_volume_7d
-      return new Map(rows.map((row: any) => [row.day, row.avg_daily_volume_7d]));
+      return new Map(rows.map((row: any) => [row.day, row.avg_daily_volume_7d])) as Map<string, any>;
     };
 
     const photonVolumeMap = createVolumeMap('photon');
@@ -1376,11 +1376,11 @@ export default function MarketStatsPage() {
       // Add data point with values from all bots
       combinedData.push({
         date,
-        axiom: getVolumeForDate(axiomData, date),
-        photon: getVolumeForDate(photonData, date),
-        bullx: getVolumeForDate(bullxData, date),
-        trojan: getVolumeForDate(trojanData, date),
-        gmgn: getVolumeForDate(gmgnData, date)
+        axiom: getVolumeForDate(tradingBotData?.axiom?.result?.rows || [], date),
+        photon: getVolumeForDate(tradingBotData?.photon?.result?.rows || [], date),
+        bullx: getVolumeForDate(tradingBotData?.bullX?.result?.rows || [], date),
+        trojan: getVolumeForDate(tradingBotData?.trojan?.result?.rows || [], date),
+        gmgn: getVolumeForDate(tradingBotData?.gmgn?.result?.rows || [], date)
       });
     }
     
@@ -1662,16 +1662,6 @@ export default function MarketStatsPage() {
         <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 sm:p-8">
           {renderContent()}
         </div>
-        
-        {/* Token Launch Graph Modal */}
-        <AnimatePresence>
-          {showTokenGraph && data?.tokenHistory && (
-            <TokenLaunchGraph 
-              data={data.tokenHistory} 
-              onClose={() => setShowTokenGraph(false)} 
-            />
-          )}
-        </AnimatePresence>
       </main>
     </div>
   );
