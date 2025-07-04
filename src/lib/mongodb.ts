@@ -1,11 +1,5 @@
 import { MongoClient, Db } from 'mongodb';
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
-}
-
 // Extract database name from the URI or use a default
 const getDbName = (uri: string): string => {
   try {
@@ -22,6 +16,13 @@ let cachedClient: MongoClient | null = null;
 let cachedDb: Db | null = null;
 
 export async function connectToDatabase() {
+  // Move environment variable check here (runtime only)
+  const MONGODB_URI = process.env.MONGODB_URI;
+  
+  if (!MONGODB_URI) {
+    throw new Error('Please define the MONGODB_URI environment variable');
+  }
+
   try {
     if (cachedClient && cachedDb) {
       console.log('Using cached database connection');
@@ -29,12 +30,12 @@ export async function connectToDatabase() {
     }
 
     console.log('Creating new database connection');
-    console.log('MongoDB URI:', MONGODB_URI!.replace(/:[^:]*@/, ':****@')); // Log URI with password hidden
+    console.log('MongoDB URI:', MONGODB_URI.replace(/:[^:]*@/, ':****@')); // Log URI with password hidden
     
     // Try to connect with more detailed error handling
     let client: MongoClient;
     try {
-      client = await MongoClient.connect(MONGODB_URI!, {
+      client = await MongoClient.connect(MONGODB_URI, {
         connectTimeoutMS: 10000, // 10 seconds
         socketTimeoutMS: 45000, // 45 seconds
       });
@@ -48,7 +49,7 @@ export async function connectToDatabase() {
       throw new Error(`Failed to connect to MongoDB: ${connectError.message}`);
     }
     
-    const dbName = getDbName(MONGODB_URI!);
+    const dbName = getDbName(MONGODB_URI);
     console.log('Using database:', dbName);
     
     const db = client.db(dbName);
