@@ -1375,12 +1375,12 @@ export default function MarketStatsPage() {
       
       // Add data point with values from all bots
       combinedData.push({
-        date,
-        axiom: getVolumeForDate(tradingBotData?.axiom?.result?.rows || [], date),
-        photon: getVolumeForDate(tradingBotData?.photon?.result?.rows || [], date),
-        bullx: getVolumeForDate(tradingBotData?.bullX?.result?.rows || [], date),
-        trojan: getVolumeForDate(tradingBotData?.trojan?.result?.rows || [], date),
-        gmgn: getVolumeForDate(tradingBotData?.gmgn?.result?.rows || [], date)
+        date: date as string,
+        axiom: getVolumeForDate(tradingBotData?.axiom?.result?.rows || [], date as string),
+        photon: getVolumeForDate(tradingBotData?.photon?.result?.rows || [], date as string),
+        bullx: getVolumeForDate(tradingBotData?.bullX?.result?.rows || [], date as string),
+        trojan: getVolumeForDate(tradingBotData?.trojan?.result?.rows || [], date as string),
+        gmgn: getVolumeForDate(tradingBotData?.gmgn?.result?.rows || [], date as string)
       });
     }
     
