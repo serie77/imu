@@ -45,7 +45,7 @@ const AiChat = ({
   const [typingMessage, setTypingMessage] = useState<any>(null);
   const [typingIndex, setTypingIndex] = useState(0);
   const [typingSpeed, setTypingSpeed] = useState(30); // milliseconds per character
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [selectedInfo, setSelectedInfo] = useState<any>(null);
 
   // Predefined questions
@@ -281,14 +281,18 @@ const AiChat = ({
                 {/* Options */}
                 {message.role === 'assistant' && message.options && (
                   <div className="mt-2 space-y-1">
-                    {message.options.map((option, optIndex) => (
+                    {message.options.map((option: any, optIndex: number) => (
                       <button
                         key={optIndex}
                         onClick={() => handleOptionClick(option)}
                         className="block text-left w-full px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-white text-sm transition-colors"
                       >
                         <div className="flex items-center">
-                          {option.icon && option.icon}
+                          {option.icon && (
+                            <span className="mr-2">
+                              {option.icon}
+                            </span>
+                          )}
                           <span>{option.text}</span>
                           <ChevronRight size={14} className="ml-auto" />
                         </div>
@@ -368,8 +372,8 @@ const AiChat = ({
                 key={p.name}
                 onClick={() => onSavePersonality(p.name)}
                 className={`p-2 rounded-lg text-white text-sm ${
-                  personality.name === p.name 
-                    ? `bg-gradient-to-r ${p.color} ring-2 ring-white` 
+                  personality === p.id
+                    ? `bg-blue-600 ring-2 ring-white`
                     : 'bg-gray-800 hover:bg-gray-700'
                 }`}
               >
@@ -466,7 +470,7 @@ const AiChat = ({
           exit={{ opacity: 0, y: 20, scale: 0.9 }}
         >
           {/* Header */}
-          <div className={`p-3 bg-gradient-to-r ${personality.color} flex justify-between items-center`}>
+          <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 flex justify-between items-center">
             <h3 className="text-white font-medium">Solana Assistant</h3>
             <button onClick={onClose} className="text-white/80 hover:text-white">
               <X size={18} />

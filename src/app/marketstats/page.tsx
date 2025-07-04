@@ -1449,7 +1449,7 @@ export default function MarketStatsPage() {
                   tickFormatter={(value) => formatCurrency(value, 0)} 
                 />
                 <Tooltip 
-                  formatter={(value) => formatCurrency(value)}
+                  formatter={(value: any) => formatCurrency(Number(value) || 0)}
                   labelFormatter={(value) => `Date: ${value}`}
                   contentStyle={{ 
                     backgroundColor: '#222', 
