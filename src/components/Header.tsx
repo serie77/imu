@@ -36,7 +36,7 @@ export default function Header() {
           className="flex items-center space-x-2 bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-lg border border-gray-700/50"
           whileHover={{ scale: 1.02 }}
         >
-          <span className="text-gray-400 text-sm">CA: 0x123...789</span>
+          <span className="text-gray-400 text-sm">CA: ....pump</span>
           <motion.button 
             className="p-1.5 rounded-md text-gray-500 hover:text-white hover:bg-gray-700/50 transition-all duration-200"
             whileHover={{ scale: 1.1 }}
