@@ -38,7 +38,9 @@ export default async function handler(req, res) {
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage'
+          '--disable-dev-shm-usage',
+          '--memory-pressure-off',
+          '--max_old_space_size=4096'
         ]
       });
       
