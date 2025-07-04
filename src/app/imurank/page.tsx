@@ -72,7 +72,6 @@ const fetchWalletData = async (address: string, timeframe = '1d') => {
       timestamp: trade.timestamp
     })) || [];
     
-    console.log('API Data:', data);
     return data;
   } catch (error) {
     console.error('Error scraping data:', error);
@@ -460,111 +459,189 @@ const ShareStatsModal = ({ isOpen, onClose, stats }: {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-[#2a374a] to-[#1f2937] border border-gray-700/50 rounded-2xl w-full max-w-[720px] relative shadow-2xl">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700/50 rounded-3xl w-full max-w-[800px] relative shadow-2xl overflow-hidden"
+      >
+        {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white z-20"
+          className="absolute top-6 right-6 text-slate-400 hover:text-white z-20 transition-colors duration-200 p-2 rounded-full hover:bg-slate-800/50"
         >
           <X size={20} />
         </button>
 
+        {/* Main card content */}
         <div 
           ref={cardRef}
-          className="p-10 w-full bg-gradient-to-br from-[#2a374a] to-[#1f2937]"
+          className="p-12 w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative"
         >
+          {/* Background decorative elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-full blur-3xl" />
+          </div>
+
           {/* Header */}
-          <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-700/50">
-            <div className="flex items-center space-x-3">
-              <img src="/imu.png" alt="IMU" className="w-10 h-10" />
-              <span className="text-2xl font-bold text-white">IMU Rank</span>
+          <div className="relative z-10 flex items-center justify-between mb-8 pb-6 border-b border-slate-700/30">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <img src="/imuicon.png" alt="IMU" className="w-12 h-12 drop-shadow-lg" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-white">
+                  IMU Rank
+                </h1>
+                <p className="text-slate-400 text-sm">Performance Analytics</p>
+              </div>
             </div>
-            <div className="text-sm text-gray-300 bg-gray-800/70 rounded-full px-4 py-1.5 border border-gray-700/50">
+            <div className="flex items-center justify-center text-sm text-slate-300 bg-slate-800/80 rounded-full px-5 py-2.5 border border-slate-600/30 font-medium h-10">
               30D Stats
             </div>
           </div>
 
           {/* Address */}
-          <div className="text-gray-400 text-center text-base mb-8 font-mono">
-            {stats.address}
+          <div className="relative z-10 text-center mb-10">
+            <div className="inline-block bg-slate-800/50 backdrop-blur-sm rounded-2xl px-6 py-3 border border-slate-700/30">
+              <p className="text-slate-300 text-lg font-mono tracking-wide">
+                {stats.address}
+              </p>
+            </div>
           </div>
 
-          {/* Main stats */}
-          <div className="grid grid-cols-2 gap-6 mb-8">
-            <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-700/30 rounded-2xl p-6 flex flex-col justify-center items-center">
-              <div className="text-6xl font-bold text-teal-400">{stats.rank}</div>
-              <div className="text-lg text-gray-400 mt-2">Rank</div>
+          {/* Main stats - Hero section (ONLY Rank and PNL) */}
+          <div className="relative z-10 grid grid-cols-2 gap-8 mb-10">
+            {/* Rank Card */}
+            <div className="group relative overflow-hidden bg-teal-500 rounded-3xl p-8 border border-slate-700/30 hover:border-teal-400/50 transition-all duration-300">
+              <div className="relative flex flex-col items-center justify-center h-full text-center">
+                <div className="text-7xl font-black text-white mb-1 -mt-2">
+                  {stats.rank}
+                </div>
+                <div className="text-xl text-white font-semibold">Rank</div>
+              </div>
             </div>
-            <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-700/30 rounded-2xl p-6 flex flex-col justify-center items-center">
-              <div className="text-5xl font-bold text-green-400">{stats.pnl}</div>
-              <div className="text-lg text-gray-400 mt-2">PNL</div>
+
+            {/* PNL Card */}
+            <div className="group relative overflow-hidden bg-green-500 rounded-3xl p-8 border border-slate-700/30 hover:border-green-400/50 transition-all duration-300">
+              <div className="relative flex flex-col items-center justify-center h-full text-center">
+                <div className="text-6xl font-black text-white mb-1 -mt-2">
+                  {stats.pnl}
+                </div>
+                <div className="text-xl text-white font-semibold">PNL</div>
+              </div>
             </div>
           </div>
 
           {/* Medals Section */}
           {stats.achievedMedals && stats.achievedMedals.length > 0 && (
-            <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-700/30 rounded-2xl p-6 mb-8">
-              <div className="text-center text-lg font-semibold text-gray-300 mb-4">Achievements</div>
-              <div className="flex justify-center gap-5 flex-wrap">
-                {stats.achievedMedals.map((medal, index) => (
-                  <div
-                    key={index}
-                    className={`
-                      w-14 h-14 rounded-full
-                      bg-gradient-to-br ${medal.color}
-                      flex items-center justify-center
-                      shadow-lg
-                    `}
-                  >
-                    <medal.icon className="w-6 h-6 text-white" strokeWidth={2.5} />
-                  </div>
-                ))}
+            <div className="relative z-10 mb-10">
+              <div className="bg-slate-800 rounded-3xl p-8 border border-slate-700/30">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-white mb-2">
+                    Achievements
+                  </h3>
+                  <p className="text-slate-400 text-sm">Performance milestones earned</p>
+                </div>
+                <div className="flex justify-center gap-6 flex-wrap">
+                  {stats.achievedMedals.map((medal, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                      className={`
+                        relative group
+                        w-16 h-16 rounded-2xl
+                        bg-gradient-to-br ${medal.color}
+                        flex items-center justify-center
+                        shadow-xl hover:shadow-2xl
+                        transform hover:scale-110 transition-all duration-300
+                      `}
+                    >
+                      <medal.icon className="w-7 h-7 text-white" strokeWidth={2.5} />
+                      <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20">
+                        <div className="bg-slate-900 rounded-lg p-3 text-center shadow-xl border border-slate-700/50 backdrop-blur-sm">
+                          <div className="text-xs font-bold text-white mb-1">{medal.name}</div>
+                          <div className="text-xs text-slate-300">{medal.desc}</div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
-          {/* Bottom stats */}
-          <div className="grid grid-cols-2 gap-6">
-            <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-700/30 rounded-2xl p-5 flex flex-col justify-center items-center h-full">
-              <div className="text-white text-3xl font-semibold">{stats.winRate}</div>
-              <div className="text-gray-400 text-base mt-2">Win Rate</div>
+          {/* Bottom stats grid (Win Rate, Tokens Traded, Best Trade, Hold Time) */}
+          <div className="relative z-10 grid grid-cols-2 gap-6">
+            {/* Win Rate */}
+            <div className="group bg-blue-500 rounded-2xl p-6 border border-slate-700/30 hover:border-blue-400/50 transition-all duration-300">
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="text-4xl font-bold text-white mb-2">
+                  {stats.winRate}
+                </div>
+                <div className="text-white font-medium">Win Rate</div>
+              </div>
             </div>
-            <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-700/30 rounded-2xl p-5 flex flex-col justify-center items-center h-full">
-              <div className="text-white text-3xl font-semibold">{stats.tokensTraded}</div>
-              <div className="text-gray-400 text-base mt-2">Tokens Traded</div>
+
+            {/* Tokens Traded */}
+            <div className="group bg-purple-500 rounded-2xl p-6 border border-slate-700/30 hover:border-purple-400/50 transition-all duration-300">
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="text-4xl font-bold text-white mb-2">
+                  {stats.tokensTraded}
+                </div>
+                <div className="text-white font-medium">Tokens Traded</div>
+              </div>
             </div>
-            <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-700/30 rounded-2xl p-5 flex flex-col justify-center items-center h-full">
-              <div className="text-white text-3xl font-semibold">{stats.bestTrade}</div>
-              <div className="text-gray-400 text-base mt-2">Best Trade</div>
+
+            {/* Best Trade */}
+            <div className="group bg-yellow-500 rounded-2xl p-6 border border-slate-700/30 hover:border-yellow-400/50 transition-all duration-300">
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="text-4xl font-bold text-white mb-2">
+                  {stats.bestTrade}
+                </div>
+                <div className="text-white font-medium">Best Trade</div>
+              </div>
             </div>
-            <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-700/30 rounded-2xl p-5 flex flex-col justify-center items-center h-full">
-              <div className="text-white text-3xl font-semibold">{stats.holdTime}</div>
-              <div className="text-gray-400 text-base mt-2">Avg Hold Time</div>
+
+            {/* Hold Time */}
+            <div className="group bg-emerald-500 rounded-2xl p-6 border border-slate-700/30 hover:border-emerald-400/50 transition-all duration-300">
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="text-4xl font-bold text-white mb-2">
+                  {stats.holdTime}
+                </div>
+                <div className="text-white font-medium">Avg Hold Time</div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="p-4 bg-black/20 border-t border-gray-700/50">
+        {/* Action button */}
+        <div className="p-6 bg-gradient-to-r from-slate-900/80 to-slate-800/80 backdrop-blur-sm border-t border-slate-700/30">
           <button
             onClick={handleCopyCard}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 transition-colors"
+            className="w-full bg-gradient-to-r from-purple-600 via-purple-500 to-purple-600 hover:from-purple-500 hover:via-purple-400 hover:to-purple-500 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
           >
             <ArrowUpFromLine size={20} />
             Copy Card to Clipboard
           </button>
         </div>
 
+        {/* Success notification */}
         {copied && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="absolute bottom-20 right-4 bg-green-500/20 text-green-400 px-4 py-2 rounded-full text-sm"
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="absolute bottom-24 right-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm text-green-400 px-6 py-3 rounded-full text-sm font-medium border border-green-500/30 shadow-xl"
           >
-            Copied to clipboard!
+            ✓ Copied to clipboard!
           </motion.div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 };
@@ -780,9 +857,6 @@ export default function ImuRank() {
 
     const points1 = getPoints(wallet1.stats);
     const points2 = getPoints(wallet2.stats);
-    
-    console.log('Wallet 1 Points:', points1);
-    console.log('Wallet 2 Points:', points2);
     
     return points1 > points2 ? wallet1 : wallet2;
   };
