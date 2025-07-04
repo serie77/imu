@@ -502,52 +502,6 @@ export default function MarketStatsPage() {
     fetchTradingBotData();
   }, [activeSection]);
 
-  // Add this useEffect for Jup Studio data after the PumpSwap useEffect (around line 458):
-  useEffect(() => {
-    const fetchJupStudioData = async () => {
-      if (activeSection !== 'jupStudio') return;
-      
-      try {
-        setJupStudioLoading(true);
-        
-        // Fetch both daily tokens and tokens created
-        const [dailyTokensResponse, tokensCreatedResponse] = await Promise.all([
-          fetch('/api/dune?queryId=5402168'), // Daily tokens
-          fetch('/api/dune?queryId=5402468')  // Tokens created
-        ]);
-        
-        if (!dailyTokensResponse.ok || !tokensCreatedResponse.ok) {
-          throw new Error('Failed to fetch Jup Studio data');
-        }
-        
-        const dailyTokensData = await dailyTokensResponse.json();
-        const tokensCreatedData = await tokensCreatedResponse.json();
-        
-        // Process the data similar to other sections
-        const processedData = {
-          dailyTokens: {
-            data: dailyTokensData.rows || [],
-            total: dailyTokensData.rows?.length || 0
-          },
-          tokensCreated: {
-            total: tokensCreatedData.rows?.[0]?.total_tokens || 0,
-            change: 0 // Since it's new, no change yet
-          }
-        };
-        
-        setJupStudioData(processedData);
-        setJupStudioError(null);
-      } catch (err: any) {
-        console.error('Error fetching Jup Studio data:', err);
-        setJupStudioError('Failed to load Jup Studio stats');
-      } finally {
-        setJupStudioLoading(false);
-      }
-    };
-    
-    fetchJupStudioData();
-  }, [activeSection]);
-
   // Add a log to see when the component renders and what the state is
   console.log("MarketStats: Component rendering...", {
     activeSection,
