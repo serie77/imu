@@ -5,8 +5,26 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Loader2, User, Map, ChevronRight } from 'lucide-react';
 // Import icons individually to avoid undefined errors
 import { BarChart2 } from 'lucide-react';
-import { Robot } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { Coins } from 'lucide-react';
+
+// Add proper interface for the component props
+interface AiChatProps {
+  isOpen: boolean;
+  onClose: () => void;
+  personality: string;
+  userName: string;
+  onSaveUserName: (name: string) => void;
+  onSavePersonality: (personality: string) => void;
+  personalities: Array<{
+    id: string;
+    name: string;
+    description: string;
+    systemPrompt: string;
+  }>;
+  currentPath: string;
+  onNavigate: (path: string) => void;
+}
 
 const AiChat = ({ 
   isOpen, 
@@ -18,7 +36,7 @@ const AiChat = ({
   personalities,
   currentPath,
   onNavigate
-}) => {
+}: AiChatProps) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +60,7 @@ const AiChat = ({
       text: "What are the best trading bots right now?", 
       action: "showInfo", 
       info: "Based on trading volume, Axiom is currently the leading trading bot in the Solana ecosystem. It processes over 1 million transactions daily with advanced MEV protection and minimal slippage.",
-      icon: <Robot size={16} className="mr-2" />
+      icon: <Bot />
     },
     { 
       text: "What are the top Solana tokens to watch?", 
@@ -70,7 +88,9 @@ const AiChat = ({
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages, typingIndex]);
 
   // Typing animation effect

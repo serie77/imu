@@ -541,8 +541,8 @@ export default function KOLPage() {
     let lowestVotes = Infinity;
     let lowestVotesKOL: KOL | null = null;
     
-    // Iterate through all KOLs
-    typedKolData.forEach((kol: KOL) => {
+    // Iterate through all KOLs - add explicit typing here
+    (typedKolData as KOL[]).forEach((kol: KOL) => {
       const votes = votesObj[kol.solana_address] || 0;
       
       if (votes > highestVotes) {
