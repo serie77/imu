@@ -10,20 +10,20 @@ interface RateLimiter {
   check: (limit: number, token: string) => Promise<void>;
 }
 
-export const rateLimit = ({ interval, uniqueTokenPerInterval }) => {
+export const rateLimit = ({ interval, uniqueTokenPerInterval }: RateLimitOptions): RateLimiter => {
   const tokenCache = new Map();
   
   return {
-    check: (limit, token) => {
+    check: (limit: number, token: string) => {
       const now = Date.now();
       const tokenCount = tokenCache.get(token) || [];
       
       // Remove timestamps older than the interval
-      const validTokenCount = tokenCount.filter(timestamp => now - timestamp < interval);
+      const validTokenCount = tokenCount.filter((timestamp: number) => now - timestamp < interval);
       
       // Check if the token has exceeded the limit
       if (validTokenCount.length >= limit) {
-        const error = new Error('Rate limit exceeded');
+        const error = new Error('Rate limit exceeded') as any;
         error.statusCode = 429;
         throw error;
       }
