@@ -1170,7 +1170,7 @@ export default function MarketStatsPage() {
                 </div>
               ) : (
                 <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                  {(pumpSwapData?.volumeHistory || []).map((day, index) => (
+                  {(pumpSwapData?.volumeHistory || []).map((day: any, index: number) => (
                     <div 
                       key={index} 
                       className="flex justify-between items-center py-4 px-4 border-b border-gray-700/30 hover:bg-gray-700/20 rounded-lg transition-colors"
