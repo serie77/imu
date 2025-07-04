@@ -31,6 +31,7 @@ export default async function handler(req, res) {
     let browser = null;
     
     try {
+      log('About to launch Puppeteer...');
       browser = await puppeteer.launch({
         args: [
           ...chromium.args,
@@ -48,6 +49,7 @@ export default async function handler(req, res) {
       });
       log('Puppeteer launched successfully');
       
+      log('About to create new page...');
       const page = await browser.newPage();
       log('New page created');
       
