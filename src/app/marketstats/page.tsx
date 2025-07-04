@@ -23,8 +23,6 @@ import { Activity, BarChart3, Loader2, ArrowUpRight, ArrowDownRight, RefreshCw, 
 import { fetchVolumeData, fetchTokenData, fetchTransactionData, fetchPumpSwapVolumeData, fetchAllTradingBotData } from "@/utils/dune-client";
 import type { ProcessedData } from "@/types/market-stats";
 
-const API_KEY = process.env.DUNE_API_KEY!;
-
 // Function to fetch data from Dune with better error handling
 async function fetchDuneQuery(queryId: number) {
   try {

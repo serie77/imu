@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_KEY = process.env.NEXT_PUBLIC_DUNE_API_KEY!;
+const API_KEY = process.env.DUNE_API_KEY!;
 const BASE_URL = 'https://api.dune.com/api/v1';
 
 // Simple in-memory cache with expiration
