@@ -31,7 +31,6 @@ export default async function handler(req, res) {
     let browser = null;
     
     try {
-      // SURGICAL FIX: Better chromium configuration for Vercel
       browser = await puppeteer.launch({
         args: [
           ...chromium.args,
@@ -45,14 +44,18 @@ export default async function handler(req, res) {
         executablePath: await chromium.executablePath(),
         headless: chromium.headless,
         ignoreHTTPSErrors: true,
-        timeout: 30000, // Add timeout
+        timeout: 30000,
       });
+      log('Puppeteer launched successfully');
       
       const page = await browser.newPage();
+      log('New page created');
       
       // SURGICAL FIX: Set smaller viewport and better user agent
       await page.setViewport({ width: 1024, height: 768 });
+      log('Viewport set');
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+      log('User agent set');
       
       // SURGICAL FIX: Add page timeout and better navigation
       page.setDefaultTimeout(30000);
@@ -66,6 +69,7 @@ export default async function handler(req, res) {
         waitUntil: 'domcontentloaded', // Changed from networkidle0
         timeout: 30000
       });
+      log('Page navigated');
       
       log('Waiting for stats to load...');
       await wait(3000); // Increased wait time
