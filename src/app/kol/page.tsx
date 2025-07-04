@@ -187,7 +187,7 @@ interface Vote {
 }
 
 // Add this type assertion right after the import:
-const typedKolData = kolData as KOL[];
+const typedKolData: KOL[] = kolData as KOL[];
 
 export default function KOLPage() {
   const { publicKey, connected, signMessage } = useWallet();
@@ -541,8 +541,8 @@ export default function KOLPage() {
     let lowestVotes = Infinity;
     let lowestVotesKOL: KOL | null = null;
     
-    // Iterate through all KOLs - add explicit typing here
-    (typedKolData as KOL[]).forEach((kol: KOL) => {
+    // Iterate through all KOLs - use the properly typed variable
+    typedKolData.forEach((kol: KOL) => {
       const votes = votesObj[kol.solana_address] || 0;
       
       if (votes > highestVotes) {
@@ -555,9 +555,8 @@ export default function KOLPage() {
         lowestVotesKOL = kol;
       }
     });
+
     
-    console.log('Most liked KOL:', highestVotesKOL?.name, 'with', highestVotes, 'votes');
-    console.log('Least liked KOL:', lowestVotesKOL?.name, 'with', lowestVotes, 'votes');
     
     // Update state with the results
     setMostLikedKOL(highestVotesKOL);
