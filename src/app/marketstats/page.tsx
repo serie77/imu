@@ -475,18 +475,19 @@ export default function MarketStatsPage() {
         
         setTradingBotData(allBotData);
         
-        // Process volume data for the chart
-        const volumeData = allBotData.volumeHistory || [];
-        const processedData = volumeData.map((day: any) => ({
-          date: day.date,
-          axiom: day.axiomVolume || 0,
-          photon: day.photonVolume || 0, 
-          bullx: day.bullxVolume || 0,
-          trojan: day.trojanVolume || 0,
-          gmgn: day.gmgnVolume || 0
-        }));
+        // Remove this section since volumeHistory doesn't exist in allBotData
+        // const volumeData = allBotData.volumeHistory || [];
+        // const processedData = volumeData.map((day: any) => ({
+        //   date: day.date,
+        //   axiom: day.axiomVolume || 0,
+        //   photon: day.photonVolume || 0, 
+        //   bullx: day.bullxVolume || 0,
+        //   trojan: day.trojanVolume || 0,
+        //   gmgn: day.gmgnVolume || 0
+        // }));
         
-        setBotVolumeData(processedData);
+        // setBotVolumeData(processedData);
+        setBotVolumeData([]); // Set empty array for now
         setTradingBotError(null);
       } catch (error) {
         console.error("MarketStats: Error fetching trading bot data:", error);
