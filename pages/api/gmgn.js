@@ -1,5 +1,4 @@
-const chromium = require('@sparticuz/chromium');
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 
 // Helper function for logging
 const log = (...args) => console.log('[GMGN Scraper]', ...args);
@@ -25,74 +24,43 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Address is required' });
     }
 
+    // We always use 30d, regardless of what's in the request
     const timeframe = '30d';
+
     log(`Scraping data for ${address}`);
     
     let browser = null;
     
     try {
-      log('About to launch Puppeteer...');
-      const execPath = await chromium.executablePath();
-      log('Chromium executable path:', execPath);
+      // REVERT: Use regular puppeteer launch
       browser = await puppeteer.launch({
+        headless: true,
         args: [
-          ...chromium.args,
-          '--disable-dev-shm-usage',
           '--no-sandbox',
-          '--no-first-run',
-          '--no-zygote',
-          '--single-process',
-          '--disable-extensions'
-        ],
-        defaultViewport: chromium.defaultViewport,
-        executablePath: execPath,
-        headless: chromium.headless,
-        ignoreHTTPSErrors: true,
-        timeout: 30000,
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage'
+        ]
       });
-      log('Puppeteer launched successfully');
       
-      log('About to create new page...');
       const page = await browser.newPage();
-      log('New page created');
+      await page.setViewport({ width: 1280, height: 800 });
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36');
       
-      // SURGICAL FIX: Set smaller viewport and better user agent
-      await page.setViewport({ width: 1024, height: 768 });
-      log('Viewport set');
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-      log('User agent set');
-      
-      // SURGICAL FIX: Add page timeout and better navigation
-      page.setDefaultTimeout(30000);
-      page.setDefaultNavigationTimeout(30000);
-      
+      // Always use 30d in the URL
       const cieoUrl = `https://app.cielo.finance/profile/${address}/pnl/tokens?timeframe=30d`;
       log(`Navigating to ${cieoUrl}...`);
-      
-      // SURGICAL FIX: Better page navigation with error handling
       await page.goto(cieoUrl, { 
-        waitUntil: 'domcontentloaded', // Changed from networkidle0
-        timeout: 30000
+        waitUntil: 'networkidle0',
+        timeout: 60000
       });
-      log('Page navigated');
       
       log('Waiting for stats to load...');
-      await wait(3000); // Increased wait time
+      await wait(2000);
       
-      // SURGICAL FIX: Add error handling for page evaluation
-      const rawContent = await page.evaluate(() => {
-        try {
-          return document.body.innerText;
-        } catch (e) {
-          console.error('Error getting page content:', e);
-          return '';
-        }
-      });
-      
-      log('Raw page content length:', rawContent.length);
-      if (rawContent.length < 100) {
-        log('Page content seems too short, might be blocked or not loaded');
-      }
+      // Get and log the raw text first for debugging
+      const rawContent = await page.evaluate(() => document.body.innerText);
+      log('Raw page content:');
+      log(rawContent);
       
       const stats = await page.evaluate(() => {
         try {
@@ -191,7 +159,8 @@ export default async function handler(req, res) {
           timeframe: timeframe,
           isInactive: stats.isInactive
         };
-        data.rank = calculateRank(data);
+        // If you have a calculateRank function, add it here
+        // data.rank = calculateRank(data);
         return res.status(200).json(data);
       } else {
         return res.status(200).json({
@@ -230,81 +199,3 @@ export default async function handler(req, res) {
     });
   }
 }
-
-const calculateRank = (data) => {
-  // Return unranked if we don't have enough data
-  if (!data || !data.winRate || !data.pnl || !data.holdTime) {
-    return 'Unranked';
-  }
-
-  let totalScore = 0;
-  
-  // 1. PNL Score (35 points max)
-  const pnlValue = parseFloat(data.pnl.replace(/[^0-9.-]/g, ''));
-  const pnlScore = Math.min(35, (Math.abs(pnlValue) / 10000) * 3.5);
-  // If PNL is negative, make the score negative
-  const finalPnlScore = pnlValue < 0 ? -pnlScore : pnlScore;
-  
-  // 2. Win Rate Score (25 points max)
-  const winRateValue = parseFloat(data.winRate.replace('%', ''));
-  const winRateScore = (winRateValue - 40) * 1.25;
-  
-  // 3. Hold Time Score (20 points max)
-  const holdTimeValue = parseInt(data.holdTime.split(' ')[0]);
-  const holdTimeUnit = data.holdTime.split(' ')[1].toLowerCase();
-  let holdTimeSeconds;
-  
-  // Convert hold time to seconds
-  switch(holdTimeUnit) {
-    case 'seconds':
-    case 'second':
-      holdTimeSeconds = holdTimeValue;
-      break;
-    case 'minutes':
-    case 'minute':
-      holdTimeSeconds = holdTimeValue * 60;
-      break;
-    case 'hours':
-    case 'hour':
-      holdTimeSeconds = holdTimeValue * 3600;
-      break;
-    case 'days':
-    case 'day':
-      holdTimeSeconds = holdTimeValue * 86400;
-      break;
-    default:
-      holdTimeSeconds = 0;
-  }
-  
-  const holdTimeScore = Math.min(20, (holdTimeSeconds / 30) * 10);
-  
-  // 4. Volume/Activity Score (10 points max)
-  const volumeScore = Math.min(10, (data.tokensTraded / 500) * 5);
-  
-  // 5. Risk Management Score (10 points max)
-  const bestTradePercentage = data.bestTradePercentage || 0;
-  const riskScore = Math.min(10, (bestTradePercentage / 100));
-
-  // Add score logging
-  log('Score Breakdown:');
-  log('PNL Score:', finalPnlScore);
-  log('Win Rate Score:', winRateScore);
-  log('Hold Time Score:', holdTimeScore);
-  log('Volume Score:', volumeScore);
-  log('Risk Score:', riskScore);
-
-  // Calculate total score
-  totalScore = finalPnlScore + winRateScore + holdTimeScore + volumeScore + riskScore;
-
-  // Assign rank based on total score
-  if (totalScore >= 90) return 'S+';
-  if (totalScore >= 80) return 'S';
-  if (totalScore >= 70) return 'A+';
-  if (totalScore >= 60) return 'A';
-  if (totalScore >= 50) return 'B+';
-  if (totalScore >= 40) return 'B';
-  if (totalScore >= 30) return 'C+';
-  if (totalScore >= 20) return 'C';
-  if (totalScore >= 0) return 'D';
-  return 'F';
-};

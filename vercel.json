@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "pages/api/gmgn.js": {
-      "maxDuration": 60
-    }
-  }
-} 
