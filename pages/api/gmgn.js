@@ -1,4 +1,5 @@
-const puppeteer = require('puppeteer');
+const chromium = require('@sparticuz/chromium');
+const puppeteer = require('puppeteer-core');
 
 // Helper function for logging
 const log = (...args) => console.log('[GMGN Scraper]', ...args);
@@ -33,12 +34,11 @@ export default async function handler(req, res) {
     
     try {
       browser = await puppeteer.launch({
-        headless: 'new',
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage'
-        ]
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+        ignoreHTTPSErrors: true,
       });
       
       const page = await browser.newPage();
