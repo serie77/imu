@@ -167,6 +167,19 @@ interface TokenHistoryData {
   addressesCreating: number;
 }
 
+// Add this right after the interface and before TokenLaunchGraph (around line 169)
+const formatNumber = (num: number | undefined | null) => {
+  if (num === undefined || num === null) return '0';
+  
+  if (num >= 1_000_000) {
+    return `${(num / 1_000_000).toFixed(2)}M`;
+  }
+  if (num >= 1_000) {
+    return `${(num / 1_000).toFixed(1)}K`;
+  }
+  return num.toFixed(2);
+};
+
 const TokenLaunchGraph = ({ data, onClose }: { data: TokenHistoryData[], onClose: () => void }) => {
   return (
     <motion.div
@@ -534,7 +547,7 @@ export default function MarketStatsPage() {
     }
 
     const numDays = 30; // Target number of days
-    const chartData: any[] = [];
+    const chartData = [];
 
     // --- Create lookup maps for efficient data retrieval ---
     const createVolumeMap = (botKey: string) => {
@@ -552,7 +565,7 @@ export default function MarketStatsPage() {
     const axiomRows = tradingBotData.axiom.result.rows.slice(0, numDays);
 
     for (const axiomRow of axiomRows) {
-      const currentDateStr = (axiomRow as any).day; // Full date string like "2025-04-26 00:00:00.000 UTC"
+      const currentDateStr = axiomRow.day; // Full date string like "2025-04-26 00:00:00.000 UTC"
 
       // Format the date string to "Mon DD" (e.g., "Apr 26")
       let formattedDate = "Invalid Date";
@@ -576,7 +589,7 @@ export default function MarketStatsPage() {
         return isNaN(volume) ? 0 : volume / 1000000;
       };
 
-      const axiomVolume = parseFloat((axiomRow as any).avg_daily_volume_7d || '0');
+      const axiomVolume = parseFloat(axiomRow.avg_daily_volume_7d || '0');
 
       chartData.push({
         date: formattedDate,
