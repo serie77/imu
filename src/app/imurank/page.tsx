@@ -831,30 +831,80 @@ export default function ImuRank() {
   };
 
   return (
-    <section className="flex-1 flex items-center justify-center bg-gradient-to-b from-gray-900 via-gray-800 to-black min-h-screen pt-24">
-      {/* Background Gradient Orbs */}
+    <section className="flex-1 flex items-center justify-center bg-gradient-to-b from-[#0f1117] via-[#151823] to-black min-h-screen pt-24">
+      {/* Enhanced Background Gradient Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-red-500/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl" />
+        <motion.div
+          className="absolute -top-40 -right-40 w-96 h-96 bg-red-500/10 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.1, 0.2, 0.1],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute -bottom-40 -left-40 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.2, 0.1, 0.2],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"
+          animate={{
+            rotate: [0, 360],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
       </div>
 
       <div className="w-full max-w-7xl mx-auto px-8 text-center relative z-10">
         <motion.h1
-          className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-pink-500 to-red-500 drop-shadow-lg font-mono mb-4"
+          className="text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-pink-500 to-red-500 drop-shadow-2xl font-mono mb-4"
           initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          animate={{ 
+            opacity: 1, 
+            y: 0,
+            backgroundPosition: ["0%", "100%"],
+          }}
+          transition={{ 
+            duration: 0.8, 
+            ease: "easeOut",
+            backgroundPosition: {
+              duration: 8,
+              repeat: Infinity,
+              ease: "linear"
+            }
+          }}
+          style={{
+            backgroundSize: "200% auto",
+            textShadow: "0 0 30px rgba(255, 0, 100, 0.5)"
+          }}
         >
           IMU RANK
         </motion.h1>
 
         <motion.p
-          className="text-xl text-gray-400 mb-12"
+          className="text-xl text-gray-300 mb-12 font-medium"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
         >
-          Let IMU decide how skilled you are on-chain
+          Let <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-pink-400 font-bold">IMU</span> decide how skilled you are on-chain
         </motion.p>
 
         {!connected ? (
@@ -896,11 +946,11 @@ export default function ImuRank() {
                 {/* Search bar */}
                 <div className="w-full max-w-2xl mx-auto relative">
                   <div className="relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-red-500 via-pink-500 to-red-500 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                    <div className="absolute -inset-1 bg-gradient-to-r from-red-500 via-pink-500 to-red-500 rounded-2xl blur opacity-25 group-hover:opacity-50 group-focus-within:opacity-60 transition duration-500"></div>
                     <div className="relative">
                       <Search 
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" 
-                        size={20} 
+                        className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-red-400 transition-colors duration-300" 
+                        size={22} 
                       />
                       <input
                         type="text"
@@ -910,14 +960,14 @@ export default function ImuRank() {
                           wallet1 ? "Enter second wallet address..." : "Enter first wallet address..." 
                           : "Enter wallet address..."
                         }
-                        className="w-full px-12 py-6 bg-gray-800/30 backdrop-blur-xl rounded-xl text-white placeholder-gray-400 
-                                 border-2 border-gray-700/50 focus:border-red-500/50 focus:outline-none
-                                 transition-all duration-300 shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]
-                                 focus:shadow-[inset_0_0_20px_rgba(255,0,0,0.1)]"
+                        className="w-full px-16 py-6 bg-gray-900/60 backdrop-blur-xl rounded-2xl text-white placeholder-gray-400 
+                                 border border-gray-700/50 focus:border-red-500/70 focus:outline-none
+                                 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.3)]
+                                 focus:shadow-[0_8px_30px_rgba(255,0,100,0.3)] text-lg font-medium"
                       />
                       {loading && (
-                        <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                          <div className="animate-spin rounded-full h-5 w-5 border-2 border-red-500 border-t-transparent"></div>
+                        <div className="absolute right-6 top-1/2 transform -translate-y-1/2">
+                          <div className="animate-spin rounded-full h-6 w-6 border-2 border-red-500 border-t-transparent"></div>
                         </div>
                       )}
                     </div>
@@ -925,21 +975,35 @@ export default function ImuRank() {
                 </div>
 
                 {/* PVP Mode Toggle */}
-                <motion.div className="mb-4 flex justify-center relative">
-                  <div className="relative group">
-                    <button
+                <motion.div className="mb-6 flex justify-center">
+                  <motion.div className="relative inline-block">
+                    <motion.button
                       onClick={() => {
                         setIsPvpMode(!isPvpMode);
                         resetPvp();
                       }}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                        isPvpMode ? 'bg-red-500 text-white' : 'bg-gray-700 text-gray-300'
+                      className={`relative flex items-center space-x-3 px-6 py-3 rounded-2xl transition-all duration-300 font-bold text-lg overflow-hidden ${
+                        isPvpMode 
+                          ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-[0_0_20px_rgba(255,0,100,0.4)]' 
+                          : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 border border-gray-600/50'
                       }`}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      <Swords size={20} />
+                      {/* Content */}
+                      <Swords size={24} />
                       <span>PVP Mode {isPvpMode ? 'ON' : 'OFF'}</span>
-                    </button>
-                  </div>
+                      
+                      {/* Animated overlay - only when PVP is ON */}
+                      {isPvpMode && (
+                        <motion.div
+                          className="absolute inset-0 rounded-2xl bg-gradient-to-r from-red-500/20 to-pink-500/20 pointer-events-none"
+                          animate={{ opacity: [0.2, 0.4, 0.2] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        />
+                      )}
+                    </motion.button>
+                  </motion.div>
                 </motion.div>
               </motion.div>
             ) : showComparison ? (
@@ -965,7 +1029,8 @@ export default function ImuRank() {
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-8 text-center">
                   {/* Wallet 1 Card */}
                   <motion.div
-                    className="relative bg-gray-800/30 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50"
+                    className="relative bg-gray-900/60 backdrop-blur-xl rounded-3xl p-8 border border-gray-700/30
+                               shadow-[0_20px_50px_rgba(0,0,0,0.4)] hover:border-gray-600/50 transition-all duration-300"
                     variants={{
                       initial: { y: 0, scale: 1, opacity: 1, boxShadow: '0px 0px 0px rgba(0,0,0,0)' },
                       winner: { y: -5, scale: 1.03, opacity: 1, boxShadow: '0px 0px 25px rgba(255, 215, 0, 0.5)', transition: { duration: 0.4, ease: 'easeOut' }},
@@ -1022,7 +1087,8 @@ export default function ImuRank() {
 
                   {/* Wallet 2 Card */}
                   <motion.div
-                    className="relative bg-gray-800/30 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50"
+                    className="relative bg-gray-900/60 backdrop-blur-xl rounded-3xl p-8 border border-gray-700/30
+                               shadow-[0_20px_50px_rgba(0,0,0,0.4)] hover:border-gray-600/50 transition-all duration-300"
                     variants={{
                       initial: { y: 0, scale: 1, opacity: 1, boxShadow: '0px 0px 0px rgba(0,0,0,0)' },
                       winner: { y: -5, scale: 1.03, opacity: 1, boxShadow: '0px 0px 25px rgba(255, 215, 0, 0.5)', transition: { duration: 0.4, ease: 'easeOut' }},

@@ -237,11 +237,11 @@ const formatCurrency = (value: number, decimals: number = 2) => {
   return `$${value.toFixed(decimals)}`;
 };
 
-// Add this hardcoded dates array near the top of the file, after the imports
+// Update the hardcoded dates array (around line 240):
 const hardcodedTokenActivityDates = [
-  "Dec 15", "Dec 14", "Dec 13", "Dec 12", "Dec 11", 
-  "Dec 10", "Dec 09", "Dec 08", "Dec 07", "Dec 06",
-  "Dec 05", "Dec 04", "Dec 03", "Dec 02", "Dec 01"
+  "Jul 03", "Jul 02", "Jul 01", "Jun 30", "Jun 29", 
+  "Jun 28", "Jun 27", "Jun 26", "Jun 25", "Jun 24",
+  "Jun 23", "Jun 22", "Jun 21", "Jun 20", "Jun 19"
 ];
 
 export default function MarketStatsPage() {
@@ -272,6 +272,9 @@ export default function MarketStatsPage() {
   const [growthChartViewMode, setGrowthChartViewMode] = useState('chart');
   const [botVolumeData, setBotVolumeData] = useState<any[]>([]);
   const [botViewMode, setBotViewMode] = useState('chart');
+  const [jupStudioData, setJupStudioData] = useState<any>(null);
+  const [jupStudioLoading, setJupStudioLoading] = useState(true);
+  const [jupStudioError, setJupStudioError] = useState<string | null>(null);
   
   const formatNumber = (num: number | undefined | null) => {
     if (num === undefined || num === null) return '0';
@@ -497,6 +500,52 @@ export default function MarketStatsPage() {
     };
     
     fetchTradingBotData();
+  }, [activeSection]);
+
+  // Add this useEffect for Jup Studio data after the PumpSwap useEffect (around line 458):
+  useEffect(() => {
+    const fetchJupStudioData = async () => {
+      if (activeSection !== 'jupStudio') return;
+      
+      try {
+        setJupStudioLoading(true);
+        
+        // Fetch both daily tokens and tokens created
+        const [dailyTokensResponse, tokensCreatedResponse] = await Promise.all([
+          fetch('/api/dune?queryId=5402168'), // Daily tokens
+          fetch('/api/dune?queryId=5402468')  // Tokens created
+        ]);
+        
+        if (!dailyTokensResponse.ok || !tokensCreatedResponse.ok) {
+          throw new Error('Failed to fetch Jup Studio data');
+        }
+        
+        const dailyTokensData = await dailyTokensResponse.json();
+        const tokensCreatedData = await tokensCreatedResponse.json();
+        
+        // Process the data similar to other sections
+        const processedData = {
+          dailyTokens: {
+            data: dailyTokensData.rows || [],
+            total: dailyTokensData.rows?.length || 0
+          },
+          tokensCreated: {
+            total: tokensCreatedData.rows?.[0]?.total_tokens || 0,
+            change: 0 // Since it's new, no change yet
+          }
+        };
+        
+        setJupStudioData(processedData);
+        setJupStudioError(null);
+      } catch (err: any) {
+        console.error('Error fetching Jup Studio data:', err);
+        setJupStudioError('Failed to load Jup Studio stats');
+      } finally {
+        setJupStudioLoading(false);
+      }
+    };
+    
+    fetchJupStudioData();
   }, [activeSection]);
 
   // Add a log to see when the component renders and what the state is
@@ -1607,16 +1656,31 @@ export default function MarketStatsPage() {
                 <span className="text-red-400 font-semibold">across different mediums</span>.
               </motion.p>
               
+              {/* Notice Bar for Coming Soon Launchpads */}
+              <motion.div 
+                className="flex justify-center mt-6 mb-8"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.6 }}
+              >
+                <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-yellow-500/10 border border-blue-500/20 rounded-2xl px-6 py-3 backdrop-blur-sm">
+                  <p className="text-blue-300 text-sm font-medium text-center">
+                    🚀 Our team is busy aggregating data for additional launchpads. New platforms coming very soon!
+                  </p>
+                </div>
+              </motion.div>
+
               {/* Section Tabs */}
               <motion.div 
-                className="flex justify-center mt-8 space-x-2 bg-gray-900/50 backdrop-blur-sm p-2 rounded-2xl inline-flex border border-gray-700/50"
+                className="flex flex-wrap justify-center mt-8 gap-2 bg-gray-900/50 backdrop-blur-sm p-2 rounded-2xl inline-flex border border-gray-700/50"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.8, duration: 0.6 }}
               >
+                {/* Active Tabs */}
                 <button
                   onClick={() => setActiveSection('pumpFun')}
-                  className={`px-6 py-3 rounded-xl transition-all duration-200 font-semibold ${
+                  className={`px-4 py-3 rounded-xl transition-all duration-200 font-semibold ${
                     activeSection === 'pumpFun' 
                       ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/30' 
                       : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
@@ -1626,7 +1690,7 @@ export default function MarketStatsPage() {
                 </button>
                 <button
                   onClick={() => setActiveSection('pumpSwap')}
-                  className={`px-6 py-3 rounded-xl transition-all duration-200 font-semibold ${
+                  className={`px-4 py-3 rounded-xl transition-all duration-200 font-semibold ${
                     activeSection === 'pumpSwap' 
                       ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg shadow-green-600/30' 
                       : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
@@ -1636,7 +1700,7 @@ export default function MarketStatsPage() {
                 </button>
                 <button
                   onClick={() => setActiveSection('tradingBot')}
-                  className={`px-6 py-3 rounded-xl transition-all duration-200 font-semibold ${
+                  className={`px-4 py-3 rounded-xl transition-all duration-200 font-semibold ${
                     activeSection === 'tradingBot' 
                       ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-600/30' 
                       : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
@@ -1644,6 +1708,43 @@ export default function MarketStatsPage() {
                 >
                   Trading Bots
                 </button>
+
+                {/* Coming Soon Tabs - Disabled */}
+                <div className="px-4 py-3 rounded-xl bg-gradient-to-r from-orange-600/20 to-orange-700/20 border border-orange-500/30 cursor-not-allowed opacity-75">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-orange-300 font-semibold text-sm">Bonk</span>
+                    <div className="w-3 h-3">
+                      <div className="w-3 h-3 border-2 border-orange-400 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600/20 to-blue-700/20 border border-blue-500/30 cursor-not-allowed opacity-75">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-blue-300 font-semibold text-sm">Launch<span className="text-blue-400 font-bold">Lab</span></span>
+                    <div className="w-3 h-3">
+                      <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="px-4 py-3 rounded-xl bg-gradient-to-r from-teal-600/20 to-teal-700/20 border border-teal-500/30 cursor-not-allowed opacity-75">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-teal-300 font-semibold text-sm">Believe</span>
+                    <div className="w-3 h-3">
+                      <div className="w-3 h-3 border-2 border-teal-400 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="px-4 py-3 rounded-xl bg-gradient-to-r from-yellow-600/20 to-amber-700/20 border border-yellow-500/30 cursor-not-allowed opacity-75">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-yellow-300 font-semibold text-sm">Jup<span className="text-yellow-400 font-bold">Studio</span></span>
+                    <div className="w-3 h-3">
+                      <div className="w-3 h-3 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             </div>
           </motion.div>

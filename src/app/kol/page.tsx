@@ -751,11 +751,45 @@ export default function KOLPage() {
     return 'F';
   };
 
-  // Update the calculateSentimentScore function to handle the actual data format
+  // Replace your calculateSentimentScore function with this:
   const calculateSentimentScore = (data: GMGNData | null, voteCount: number): number => {
-    if (!data || !data.rank) return 0;
+    if (!data) return 0;
 
-    const rank = data.rank;
+    // Use the EXACT same rank calculation from IMU rank page
+    const calculateRank = (data: any) => {
+      if (!data) return 'F';
+
+      // Extract numeric values
+      const pnlValue = parseFloat(data.pnl?.replace(/[^0-9.-]/g, '') || '0');
+      const winRate = parseFloat(data.winRate?.replace('%', '') || '0');
+      const totalTrades = parseInt(data.tokensTraded) || 0;
+      const holdTimeSeconds = parseInt(data.holdTime?.split(' ')[0] || '0');
+      const bestTradePercentage = data.bestTradePercentage || 0;
+
+      // Calculate component scores
+      const pnlScore = Math.min(35, (Math.abs(pnlValue) / 10000) * 3.5) * (pnlValue >= 0 ? 1 : -1);
+      const winRateScore = (winRate - 40) * 1.25;
+      const holdTimeScore = Math.min(20, (holdTimeSeconds / 30) * 10);
+      const volumeScore = Math.min(10, (totalTrades / 500) * 5);
+      const riskScore = Math.min(10, (bestTradePercentage / 100));
+
+      const totalScore = pnlScore + winRateScore + holdTimeScore + volumeScore + riskScore;
+
+      // Return rank based on total score
+      if (totalScore >= 90) return 'S+';
+      if (totalScore >= 80) return 'S';
+      if (totalScore >= 70) return 'A+';
+      if (totalScore >= 60) return 'A';
+      if (totalScore >= 50) return 'B+';
+      if (totalScore >= 40) return 'B';
+      if (totalScore >= 30) return 'C+';
+      if (totalScore >= 20) return 'C';
+      if (totalScore >= 0) return 'D';
+      return 'F';
+    };
+
+    // Calculate the rank
+    const rank = calculateRank(data);
     
     // Check if inactive
     const isInactive = data.isInactive || (data.tokensTraded && data.tokensTraded < 10);
@@ -765,23 +799,20 @@ export default function KOLPage() {
 
     // Normalize rank score (out of 50 points for 50% weight)
     let rankScore = 0;
-    if (rank === "1st") rankScore = 50;
-    else if (rank === "2nd") rankScore = 48;
-    else if (rank === "3rd") rankScore = 46;
-    else if (rank.includes("th") || rank.includes("st") || rank.includes("nd") || rank.includes("rd")) {
-      const numericRank = parseInt(rank.replace(/[^\d]/g, ''));
-      if (numericRank <= 1000) {
-        // Moderate scoring for ranks
-        if (numericRank <= 10) {
-          rankScore = 50 - (numericRank - 1) * 1.5; // Top 10 get 36.5-50 points
-        } else if (numericRank <= 50) {
-          rankScore = 35 - (numericRank - 10) * 0.7; // 11-50 get 7-35 points
-        } else if (numericRank <= 100) {
-          rankScore = 7 - (numericRank - 50) * 0.14; // 51-100 get 0-7 points
-        } else {
-          rankScore = Math.max(0, 3 - (numericRank - 100) * 0.005); // 100+ get very low scores
-        }
-      }
+    
+    // Handle letter grades
+    switch (rank) {
+      case 'S+': rankScore = 50; break;
+      case 'S': rankScore = 45; break;
+      case 'A+': rankScore = 40; break;
+      case 'A': rankScore = 35; break;
+      case 'B+': rankScore = 30; break;
+      case 'B': rankScore = 25; break;
+      case 'C+': rankScore = 20; break;
+      case 'C': rankScore = 15; break;
+      case 'D': rankScore = 10; break;
+      case 'F': rankScore = 5; break;
+      default: rankScore = 0; break;
     }
 
     // Normalize votes (out of 35 points for 35% weight)
@@ -791,22 +822,14 @@ export default function KOLPage() {
     // Activity score (up to 25 points for 25% weight)
     let activityScore = 0;
     if (data.tokensTraded) {
-      if (data.tokensTraded >= 2000) {
-        activityScore = 25; // Extremely active
-      } else if (data.tokensTraded >= 1000) {
-        activityScore = 20; // Very active
-      } else if (data.tokensTraded >= 500) {
-        activityScore = 15; // Active
-      } else if (data.tokensTraded >= 200) {
-        activityScore = 10; // Moderately active
-      } else if (data.tokensTraded >= 100) {
-        activityScore = 5; // Somewhat active
-      } else if (data.tokensTraded >= 50) {
-        activityScore = 2; // Low activity
-      }
+      if (data.tokensTraded >= 2000) activityScore = 25;
+      else if (data.tokensTraded >= 1000) activityScore = 20;
+      else if (data.tokensTraded >= 500) activityScore = 15;
+      else if (data.tokensTraded >= 200) activityScore = 10;
+      else if (data.tokensTraded >= 100) activityScore = 5;
+      else if (data.tokensTraded >= 50) activityScore = 2;
     }
 
-    // Calculate final sentiment score (max 100)
     const sentimentScore = Math.min(100, rankScore + normalizedVotes + activityScore);
 
     console.log(`[SENTIMENT CALCULATION] Rank: ${rank} (${rankScore}), Votes: ${voteCount} (${normalizedVotes}), Activity: ${data.tokensTraded} (${activityScore}), Final: ${sentimentScore}`);
@@ -1505,12 +1528,45 @@ const RankDisplay = ({ rank, isLoading = false }: { rank: string; isLoading?: bo
     </div>
   );
 };
-
 // Add function to calculate sentiment score
 const calculateSentimentScore = (data: GMGNData | null, voteCount: number): number => {
-  if (!data || !data.rank) return 0;
+  if (!data) return 0;
 
-  const rank = data.rank;
+  // Use the EXACT same rank calculation from IMU rank page
+  const calculateRank = (data: any) => {
+    if (!data) return 'F';
+
+    // Extract numeric values
+    const pnlValue = parseFloat(data.pnl?.replace(/[^0-9.-]/g, '') || '0');
+    const winRate = parseFloat(data.winRate?.replace('%', '') || '0');
+    const totalTrades = parseInt(data.tokensTraded) || 0;
+    const holdTimeSeconds = parseInt(data.holdTime?.split(' ')[0] || '0');
+    const bestTradePercentage = data.bestTradePercentage || 0;
+
+    // Calculate component scores
+    const pnlScore = Math.min(35, (Math.abs(pnlValue) / 10000) * 3.5) * (pnlValue >= 0 ? 1 : -1);
+    const winRateScore = (winRate - 40) * 1.25;
+    const holdTimeScore = Math.min(20, (holdTimeSeconds / 30) * 10);
+    const volumeScore = Math.min(10, (totalTrades / 500) * 5);
+    const riskScore = Math.min(10, (bestTradePercentage / 100));
+
+    const totalScore = pnlScore + winRateScore + holdTimeScore + volumeScore + riskScore;
+
+    // Return rank based on total score
+    if (totalScore >= 90) return 'S+';
+    if (totalScore >= 80) return 'S';
+    if (totalScore >= 70) return 'A+';
+    if (totalScore >= 60) return 'A';
+    if (totalScore >= 50) return 'B+';
+    if (totalScore >= 40) return 'B';
+    if (totalScore >= 30) return 'C+';
+    if (totalScore >= 20) return 'C';
+    if (totalScore >= 0) return 'D';
+    return 'F';
+  };
+
+  // Calculate the rank
+  const rank = calculateRank(data);
   
   // Check if inactive
   const isInactive = data.isInactive || (data.tokensTraded && data.tokensTraded < 10);
@@ -1520,23 +1576,20 @@ const calculateSentimentScore = (data: GMGNData | null, voteCount: number): numb
 
   // Normalize rank score (out of 50 points for 50% weight)
   let rankScore = 0;
-  if (rank === "1st") rankScore = 50;
-  else if (rank === "2nd") rankScore = 48;
-  else if (rank === "3rd") rankScore = 46;
-  else if (rank.includes("th") || rank.includes("st") || rank.includes("nd") || rank.includes("rd")) {
-    const numericRank = parseInt(rank.replace(/[^\d]/g, ''));
-    if (numericRank <= 1000) {
-      // Moderate scoring for ranks
-      if (numericRank <= 10) {
-        rankScore = 50 - (numericRank - 1) * 1.5; // Top 10 get 36.5-50 points
-      } else if (numericRank <= 50) {
-        rankScore = 35 - (numericRank - 10) * 0.7; // 11-50 get 7-35 points
-      } else if (numericRank <= 100) {
-        rankScore = 7 - (numericRank - 50) * 0.14; // 51-100 get 0-7 points
-      } else {
-        rankScore = Math.max(0, 3 - (numericRank - 100) * 0.005); // 100+ get very low scores
-      }
-    }
+  
+  // Handle letter grades
+  switch (rank) {
+    case 'S+': rankScore = 50; break;
+    case 'S': rankScore = 45; break;
+    case 'A+': rankScore = 40; break;
+    case 'A': rankScore = 35; break;
+    case 'B+': rankScore = 30; break;
+    case 'B': rankScore = 25; break;
+    case 'C+': rankScore = 20; break;
+    case 'C': rankScore = 15; break;
+    case 'D': rankScore = 10; break;
+    case 'F': rankScore = 5; break;
+    default: rankScore = 0; break;
   }
 
   // Normalize votes (out of 35 points for 35% weight)
@@ -1546,22 +1599,14 @@ const calculateSentimentScore = (data: GMGNData | null, voteCount: number): numb
   // Activity score (up to 25 points for 25% weight)
   let activityScore = 0;
   if (data.tokensTraded) {
-    if (data.tokensTraded >= 2000) {
-      activityScore = 25; // Extremely active
-    } else if (data.tokensTraded >= 1000) {
-      activityScore = 20; // Very active
-    } else if (data.tokensTraded >= 500) {
-      activityScore = 15; // Active
-    } else if (data.tokensTraded >= 200) {
-      activityScore = 10; // Moderately active
-    } else if (data.tokensTraded >= 100) {
-      activityScore = 5; // Somewhat active
-    } else if (data.tokensTraded >= 50) {
-      activityScore = 2; // Low activity
-    }
+    if (data.tokensTraded >= 2000) activityScore = 25;
+    else if (data.tokensTraded >= 1000) activityScore = 20;
+    else if (data.tokensTraded >= 500) activityScore = 15;
+    else if (data.tokensTraded >= 200) activityScore = 10;
+    else if (data.tokensTraded >= 100) activityScore = 5;
+    else if (data.tokensTraded >= 50) activityScore = 2;
   }
 
-  // Calculate final sentiment score (max 100)
   const sentimentScore = Math.min(100, rankScore + normalizedVotes + activityScore);
 
   console.log(`[SENTIMENT CALCULATION] Rank: ${rank} (${rankScore}), Votes: ${voteCount} (${normalizedVotes}), Activity: ${data.tokensTraded} (${activityScore}), Final: ${sentimentScore}`);
@@ -1569,25 +1614,59 @@ const calculateSentimentScore = (data: GMGNData | null, voteCount: number): numb
   return Math.round(sentimentScore);
 };
 
-// Add function to get unique banner gradient for each KOL
-const getKOLBannerGradient = (kolName: string) => {
-  const gradients = [
-    'from-purple-900/50 via-pink-900/30 to-indigo-900/50',
-    'from-blue-900/50 via-cyan-900/30 to-teal-900/50',
-    'from-emerald-900/50 via-green-900/30 to-lime-900/50',
-    'from-orange-900/50 via-red-900/30 to-pink-900/50',
-    'from-indigo-900/50 via-purple-900/30 to-fuchsia-900/50',
-    'from-cyan-900/50 via-blue-900/30 to-indigo-900/50',
-    'from-rose-900/50 via-pink-900/30 to-purple-900/50',
-    'from-amber-900/50 via-orange-900/30 to-red-900/50',
-  ];
+// Replace the existing getKOLBannerGradient function with this simpler approach:
+const getKOLBannerStyle = (profilePictureUrl: string) => {
+  if (!profilePictureUrl) {
+    return {
+      background: 'linear-gradient(135deg, rgb(139,92,246) 0%, rgb(59,130,246) 100%)'
+    };
+  }
   
-  // Use name hash to consistently assign same gradient to same KOL
-  const hash = kolName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return gradients[hash % gradients.length];
+  return {
+    backgroundImage: `
+      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.8) 100%),
+      url(${profilePictureUrl})
+    `,
+    backgroundSize: 'cover, 120% 120%',
+    backgroundPosition: 'center, center',
+    filter: 'blur(20px) saturate(1.5) brightness(0.6)',
+    transform: 'scale(1.1)', // Slightly scale to hide blur edges
+  };
 };
 
-// --- New KOL Profile Modal Component ---
+// Add this function before the KOLProfileModal component:
+const calculateRank = (data: any) => {
+  if (!data) return 'F';
+
+  // Extract numeric values
+  const pnlValue = parseFloat(data.pnl?.replace(/[^0-9.-]/g, '') || '0');
+  const winRate = parseFloat(data.winRate?.replace('%', '') || '0');
+  const totalTrades = parseInt(data.tokensTraded) || 0;
+  const holdTimeSeconds = parseInt(data.holdTime?.split(' ')[0] || '0');
+  const bestTradePercentage = data.bestTradePercentage || 0;
+
+  // Calculate component scores (same as IMU rank)
+  const pnlScore = Math.min(35, (Math.abs(pnlValue) / 10000) * 3.5) * (pnlValue >= 0 ? 1 : -1);
+  const winRateScore = (winRate - 40) * 1.25;
+  const holdTimeScore = Math.min(20, (holdTimeSeconds / 30) * 10);
+  const volumeScore = Math.min(10, (totalTrades / 500) * 5);
+  const riskScore = Math.min(10, (bestTradePercentage / 100));
+
+  const totalScore = pnlScore + winRateScore + holdTimeScore + volumeScore + riskScore;
+
+  // Return rank based on total score
+  if (totalScore >= 90) return 'S+';
+  if (totalScore >= 80) return 'S';
+  if (totalScore >= 70) return 'A+';
+  if (totalScore >= 60) return 'A';
+  if (totalScore >= 50) return 'B+';
+  if (totalScore >= 40) return 'B';
+  if (totalScore >= 30) return 'C+';
+  if (totalScore >= 20) return 'C';
+  if (totalScore >= 0) return 'D';
+  return 'F';
+};
+
 const KOLProfileModal = ({ 
   kol, 
   voteCount, 
@@ -1636,10 +1715,10 @@ const KOLProfileModal = ({
     };
 
     const twitterHandle = kol.twitter?.split('/').pop() || kol.twitter;
-    const imuRank = selectedKOLData?.rank || 'N/A';
+    const imuRank = selectedKOLData ? calculateRank(selectedKOLData) : 'N/A';
     const sentimentScore = calculateSentimentScore(selectedKOLData, voteCount);
     const isInactive = kol.tags?.includes('Inactive') || selectedKOLData?.isInactive;
-    const bannerGradient = getKOLBannerGradient(kol.name);
+    const bannerStyle = getKOLBannerStyle(kol.profile_picture || '/default-avatar.png');
 
     const handleFullscreen = () => {
       setIsAnimatingFullscreen(true);
@@ -1676,17 +1755,17 @@ const KOLProfileModal = ({
         >
           <div className="h-full overflow-y-auto">
             <motion.div 
-              className={`bg-gradient-to-br ${bannerGradient} relative`}
+              className="relative overflow-hidden"
+              style={bannerStyle}
               animate={{ 
                 height: isFullscreen ? '200px' : '192px'
               }}
               transition={{ duration: 0.5 }}
             >
-              {kol.banner_url && (
-                <img src={kol.banner_url} alt={`${kol.name}'s banner`} className="w-full h-full object-cover opacity-80" />
-              )}
+              {/* Remove the existing background gradient and img since it's now in the style */}
               <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
               
+              {/* Rest of your banner content */}
               <motion.button
                 onClick={handleFullscreen}
                 className="absolute top-4 right-4 p-3 rounded-xl bg-black/40 hover:bg-black/60 transition-all duration-300 group"

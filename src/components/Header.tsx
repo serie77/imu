@@ -121,14 +121,13 @@ export default function Header() {
         </Link>
 
         <a
-          href="#"
-          tabIndex={-1}
-          aria-disabled="true"
-          className="relative group px-4 py-2 text-sm font-medium text-gray-500 bg-gray-800/60 rounded-lg overflow-hidden transition-all duration-300 opacity-50 pointer-events-none cursor-not-allowed"
-          title="Coming soon!"
+          href="https://imu-1.gitbook.io/imu-docs/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="relative group px-4 py-2 text-sm font-medium rounded-lg overflow-hidden transition-all duration-300 text-gray-400 hover:text-white"
         >
           <span className="relative z-10">GitBook</span>
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 to-amber-600/0 transition-all duration-300"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 to-amber-600/0 group-hover:from-amber-500/20 group-hover:to-amber-600/20 transition-all duration-300"></div>
         </a>
 
         <div className="relative z-50">

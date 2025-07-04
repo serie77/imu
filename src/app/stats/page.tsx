@@ -91,24 +91,26 @@ export default function StatsPage() {
           </Link>
 
           {/* Gitbook Button */}
-          <div
+          <a
+            href="https://imu-1.gitbook.io/imu-docs/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="group relative overflow-hidden bg-gray-800/30 backdrop-blur-xl p-8 rounded-2xl 
-              border border-gray-700/50 transition-all duration-500 
-              shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]
-              flex flex-col items-center justify-center opacity-50 pointer-events-none cursor-not-allowed"
-            title="Coming soon!"
+              border border-gray-700/50 hover:border-yellow-500/50 transition-all duration-500 
+              shadow-[inset_0_0_20px_rgba(255,255,255,0.05)] hover:shadow-[inset_0_0_20px_rgba(255,193,7,0.1)]
+              flex flex-col items-center justify-center"
           >
             {/* Shine effect */}
-            <div className="absolute inset-0 opacity-0 duration-700 transition-opacity">
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 duration-700 transition-opacity">
               <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 via-transparent to-transparent" />
-              <div className="absolute -inset-[400%] animate-[spin_8s_linear_infinite] bg-gradient-to-r from-transparent via-yellow-500/10 to-transparent rotate-45" style={{ width: '800%', height: '800%' }} />
+              <div className="absolute -inset-[400%] animate-[spin_8s_linear_infinite] bg-gradient-to-r from-transparent via-yellow-500/10 to-transparent rotate-45 group-hover:via-yellow-500/20" style={{ width: '800%', height: '800%' }} />
             </div>
             
             <h3 className="text-2xl font-bold bg-gradient-to-br from-white via-yellow-100 to-white bg-clip-text text-transparent relative z-10 mb-3">
               Gitbook
             </h3>
             <p className="text-sm text-gray-400 relative z-10">Find out how IMU works</p>
-          </div>
+          </a>
         </div>
       </motion.div>
     </section>
