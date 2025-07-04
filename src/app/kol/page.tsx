@@ -11,7 +11,7 @@ import { PublicKey } from "@solana/web3.js";
 // --- Constants ---
 // IMPORTANT: You must replace this with the actual mint address of your token.
 // Using Wrapped SOL's address as a valid placeholder to prevent app crashes.
-const OUR_TOKEN_MINT_ADDRESS = "7BFKwYhnNfMhCFjPGjd7tb1iX9NGkgoRDT1D8viDpump";
+const OUR_TOKEN_MINT_ADDRESS = "Bof8eMmNBAi7B3ydD53GyjoVtgB1JN7neDAAtKu8pump";
 const REQUIRED_TOKEN_AMOUNT = 200000;
 const ALL_TAGS = ["VIP", "Bag Holder", "Streamer", "Inactive"];
 
