@@ -25,41 +25,65 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Address is required' });
     }
 
-    // We always use 30d, regardless of what's in the request
     const timeframe = '30d';
-
     log(`Scraping data for ${address}`);
     
     let browser = null;
     
     try {
+      // SURGICAL FIX: Better chromium configuration for Vercel
       browser = await puppeteer.launch({
-        args: chromium.args,
+        args: [
+          ...chromium.args,
+          '--disable-dev-shm-usage',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+          '--disable-extensions'
+        ],
         defaultViewport: chromium.defaultViewport,
         executablePath: await chromium.executablePath(),
         headless: chromium.headless,
         ignoreHTTPSErrors: true,
+        timeout: 30000, // Add timeout
       });
       
       const page = await browser.newPage();
-      await page.setViewport({ width: 1280, height: 800 });
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36');
       
-      // Always use 30d in the URL
+      // SURGICAL FIX: Set smaller viewport and better user agent
+      await page.setViewport({ width: 1024, height: 768 });
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+      
+      // SURGICAL FIX: Add page timeout and better navigation
+      page.setDefaultTimeout(30000);
+      page.setDefaultNavigationTimeout(30000);
+      
       const cieoUrl = `https://app.cielo.finance/profile/${address}/pnl/tokens?timeframe=30d`;
       log(`Navigating to ${cieoUrl}...`);
+      
+      // SURGICAL FIX: Better page navigation with error handling
       await page.goto(cieoUrl, { 
-        waitUntil: 'networkidle0',
-        timeout: 60000
+        waitUntil: 'domcontentloaded', // Changed from networkidle0
+        timeout: 30000
       });
       
       log('Waiting for stats to load...');
-      await wait(2000);
+      await wait(3000); // Increased wait time
       
-      // Get and log the raw text first for debugging
-      const rawContent = await page.evaluate(() => document.body.innerText);
-      log('Raw page content:');
-      log(rawContent);
+      // SURGICAL FIX: Add error handling for page evaluation
+      const rawContent = await page.evaluate(() => {
+        try {
+          return document.body.innerText;
+        } catch (e) {
+          console.error('Error getting page content:', e);
+          return '';
+        }
+      });
+      
+      log('Raw page content length:', rawContent.length);
+      if (rawContent.length < 100) {
+        log('Page content seems too short, might be blocked or not loaded');
+      }
       
       const stats = await page.evaluate(() => {
         try {
